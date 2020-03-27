@@ -14,7 +14,7 @@ include("reduce.jl")
 # Get model input:                                    #
 # grid, model type, physcial and numerical parameters #
 #######################################################
-function Model_input()
+function Model_input(GPU)
     model_data = []
     grid_data  = []
     time_data  = []
@@ -70,7 +70,7 @@ function Model_input()
     time_integration = "forward_euler"
 
     # Hardware/computing information
-    GPU = false
+    #GPU = false
 
     grid_data  = Dict("x0"=>x0, "y0"=>y0, "nx"=>nx, "ny"=>ny, "dx"=>dx, "dy"=>dy)
     model_data = Dict("advection"=>advection, "diffusion"=>diffusion, "friction"=>friction, "h0"=>h0, "bcleft"=>bcleft, "bcright"=>bcright)
@@ -398,12 +398,12 @@ end
 ###########################################################
 ###                       Main program                  ###
 ###########################################################
-function Athesis()
+function Athesis(;boolean::GPU=false)
 
     println("Running Athesis ...")
 
     # Model input
-    model_data, grid_data, time_data, parameters, err = Model_input()
+    model_data, grid_data, time_data, parameters, err = Model_input(GPU)
 
     # Grid setup
     grid, err = Grid_setup(grid_data)
@@ -420,4 +420,4 @@ function Athesis()
 
 end
 
-Athesis()
+Athesis(GPU=true)
