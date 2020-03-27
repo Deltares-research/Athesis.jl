@@ -14,7 +14,7 @@ include("reduce.jl")
 # Get model input:                                    #
 # grid, model type, physcial and numerical parameters #
 #######################################################
-function Model_input(GPU)
+function model_input(GPU)
     model_data = []
     grid_data  = []
     time_data  = []
@@ -83,7 +83,7 @@ end
 #############################################
 # Setup the grid: structured / unstructured #
 #############################################
-function Grid_setup(grid_data)
+function grid_setup(grid_data)
 
     println("Setting up the grid ...")
     grid = []
@@ -115,7 +115,7 @@ end
 # Setup the model:                                  #
 # discretization in space and time, initializations #
 #####################################################
-function Model_setup(model_data, time_data, grid, parameters)
+function model_setup(model_data, time_data, grid, parameters)
 
     println("Setting up the model ...")
 
@@ -199,7 +199,7 @@ function calculateDiffusion_gpu!(unew::AbstractArray, u::AbstractArray, dx, dy, 
     return nothing
 end
 
-function Update_boundary_conditions!(model)
+function update_boundary_conditions!(model)
     bcs = []
     err = ' '
 
@@ -225,7 +225,7 @@ end
 #############################################
 # Time loop: integrate the solution in time #
 #############################################
-function Timeloop!(model, pars, grid, time_data, parameters)
+function timeloop!(model, pars, grid, time_data, parameters)
 
     println("Starting time loop ...")
     #solution = []
@@ -241,9 +241,9 @@ function Timeloop!(model, pars, grid, time_data, parameters)
 
     for n = 1:maxsteps
         if GPU
-            model, conv, err = Single_timestep_GPU!(n, dt, model, pars, grid, parameters, conv)
+            model, conv, err = single_timestep_GPU!(n, dt, model, pars, grid, parameters, conv)
         else
-            model, conv, err = Single_timestep!(n, dt, model, grid, parameters, conv)
+            model, conv, err = single_timestep!(n, dt, model, grid, parameters, conv)
         end
 
         if conv
@@ -261,12 +261,12 @@ end
 #########################################
 # Perform a single time step on the GPU #
 #########################################
-function Single_timestep_GPU!(niter, dt, model, pars, grid, parameters, conv)
+function single_timestep_GPU!(niter, dt, model, pars, grid, parameters, conv)
     err = ' '
     maxchange = 0.0
 
     # set boundaries for present time steps
-    model, err = Update_boundary_conditions!(model)
+    model, err = update_boundary_conditions!(model)
 
     # Unpack present state
     h       = model["state"][1]
@@ -323,12 +323,12 @@ end
 ##############################
 # Perform a single time step #
 ##############################
-function Single_timestep!(niter, dt, model, grid, parameters, conv)
+function single_timestep!(niter, dt, model, grid, parameters, conv)
     err = ' '
     maxchange = 0.0
 
     # set boundaries for present time steps
-    model, err = Update_boundary_conditions!(model)
+    model, err = update_boundary_conditions!(model)
 
     # Unpack present state
     h       = model["state"][1]
@@ -385,7 +385,7 @@ end
 ########################
 # Finalize the program #
 ########################
-function Finalization!(model, grid)
+function finalization!(model, grid)
 
     println("Finalizing model ...")
     err = ' '
@@ -398,26 +398,33 @@ end
 ###########################################################
 ###                       Main program                  ###
 ###########################################################
-function Athesis(;boolean::GPU=false)
+function athesis(; GPU::Bool=false)
 
     println("Running Athesis ...")
 
     # Model input
-    model_data, grid_data, time_data, parameters, err = Model_input(GPU)
+    model_data, grid_data, time_data, parameters, err = model_input(GPU)
 
     # Grid setup
-    grid, err = Grid_setup(grid_data)
+    grid, err = grid_setup(grid_data)
 
     # Model setup
-    model, pars, err = Model_setup(model_data, time_data, grid, parameters)
+    model, pars, err = model_setup(model_data, time_data, grid, parameters)
 
     # Start of the time loop
-    solution, err = Timeloop!(model, pars, grid, time_data, parameters)
+    solution, err = timeloop!(model, pars, grid, time_data, parameters)
 
     # Finalization
-    err = Finalization!(model, grid)
+    err = finalization!(model, grid)
+
     return nothing
 
 end
 
-Athesis(GPU=true)
+function time_athesis(; GPU::Bool=false)
+
+    @time athesis(GPU=GPU)
+
+end
+
+time_athesis(GPU=true)
