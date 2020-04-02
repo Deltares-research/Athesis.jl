@@ -10,7 +10,7 @@ function run()
 
     to = TimerOutput()
 
-    N = 10000000
+    N = 100000000
 
     println("Hit c for cuda...")
     c = readline()
@@ -26,30 +26,28 @@ function run()
 
     # first separate kernels:
     fill!(result, 0.0)
-    println("separate, in: ", fieldA[1:10])
     @timeit to "separate "*backendname(useCUDA) begin
-    gridloop(kernel_multby2, result, fieldA)
-    gridloop(kernel_mean, result, (fieldA, fieldB))
+    gridloop(result, kernel_multby2, fieldA)
+    gridloop(result, kernel_mean, (fieldA, fieldB))
     end
-    println("result:  ", result[1:10])
+    println("result separate:  ", result[1:10])
 
     # then merged into one:
     fill!(result, 0.0)
-    println("fused, in: ", fieldA[1:10])
     @timeit to "fused "*backendname(useCUDA) begin
-    gridloop(kernel_fused, result, (fieldA, fieldB))
+    gridloop(result, kernel_fused, (fieldA, fieldB))
     end
-    println("result:  ", result[1:10])
+    println("result fused:  ", result[1:10])
 
     # then composed:
     fill!(result, 0.0)
-    println("composed, in: ", fieldA[1:10])
     @timeit to "composed "*backendname(useCUDA) begin
-    gridloop(kernel_composed, result, (fieldA, fieldB))
+    gridloop(result, kernel_composed, (fieldA, fieldB))
     end
-    println("result:  ", result[1:10])
+    println("result composed:  ", result[1:10])
 
     print_timer(to)
+
 end
 
 @inline function kernel_multby2(i, result, ξ)
@@ -69,23 +67,23 @@ end
     kernel_mean(i, result, (ξ, ψ))
 end
 
-function cuda_wrap_kernel(kernel::Function, result::AbstractArray{Float64}, args)
+function cuda_wrap_kernel(result, kernel, input)
     ix = (blockIdx().x-1)*blockDim().x  + threadIdx().x
     if (ix <= length(result))
-        kernel(ix, result, args)
+        kernel(ix, result, input)
     end
 
     return nothing
 end
 
-function gridloop(kernel::Function, result::AbstractArray{Float64}, args)
+function gridloop(result, kernel, input)
     if result isa CuArray
         ths = 256
         bls = Int(ceil(length(result) / ths))
-        @cuda threads=ths blocks=bls cuda_wrap_kernel(kernel, result, args)
+        @cuda threads=ths blocks=bls cuda_wrap_kernel(result, kernel, input)
     else
         for i = 1 : length(result)
-            kernel(i, result, args)
+            kernel(i, result, input)
         end
     end
 end
