@@ -1,64 +1,91 @@
 using CUDAdrv, CUDAnative
 using CuArrays
+using TimerOutputs
 
-function cuda_wrap_kernel!(kernel, values::AbstractArray{Float64}, result::AbstractArray{Float64})
+function backendname(useCUDA)
+    return useCUDA ? "GPU" : "CPU"
+end
+
+function run()
+
+    to = TimerOutput()
+
+    N = 10000000
+
+    println("Hit c for cuda...")
+    c = readline()
+    useCUDA = (c == "c")
+
+    fieldA = fill(1.0, N)
+    fieldB = fill(2.0, N)
+    if useCUDA
+        fieldA = CuArray(fieldA)
+        fieldB = CuArray(fieldB)
+    end
+    result = similar(fieldA)
+
+    # first separate kernels:
+    fill!(result, 0.0)
+    println("separate, in: ", fieldA[1:10])
+    @timeit to "separate "*backendname(useCUDA) begin
+    gridloop(kernel_multby2, result, fieldA)
+    gridloop(kernel_mean, result, (fieldA, fieldB))
+    end
+    println("result:  ", result[1:10])
+
+    # then merged into one:
+    fill!(result, 0.0)
+    println("fused, in: ", fieldA[1:10])
+    @timeit to "fused "*backendname(useCUDA) begin
+    gridloop(kernel_fused, result, (fieldA, fieldB))
+    end
+    println("result:  ", result[1:10])
+
+    # then composed:
+    fill!(result, 0.0)
+    println("composed, in: ", fieldA[1:10])
+    @timeit to "composed "*backendname(useCUDA) begin
+    gridloop(kernel_composed, result, (fieldA, fieldB))
+    end
+    println("result:  ", result[1:10])
+
+    print_timer(to)
+end
+
+@inline function kernel_multby2(i, result, ξ)
+    @inbounds result[i] += 2 * ξ[i]
+end
+
+@inline function kernel_mean(i, result, (ξ, ψ))
+    @inbounds result[i] += 0.5 * (ξ[i] + ψ[i])
+end
+
+@inline function kernel_fused(i, result, (ξ, ψ))
+    @inbounds result[i] += 2*ξ[i] + 0.5*(ξ[i] + ψ[i])
+end
+
+@inline function kernel_composed(i, result, (ξ, ψ))
+    kernel_multby2(i, result, ξ)
+    kernel_mean(i, result, (ξ, ψ))
+end
+
+function cuda_wrap_kernel(kernel::Function, result::AbstractArray{Float64}, args)
     ix = (blockIdx().x-1)*blockDim().x  + threadIdx().x
-    if (ix <= length(values))
-        @inbounds result[ix] = kernel(values, ix)
+    if (ix <= length(result))
+        kernel(ix, result, args)
     end
 
     return nothing
 end
 
-function gridloop(kernel, field, result)
-    if field.values isa CuArray
+function gridloop(kernel::Function, result::AbstractArray{Float64}, args)
+    if result isa CuArray
         ths = 256
-        bls = Int(ceil(field.grid.N / ths))
-        @cuda threads=ths blocks=bls cuda_wrap_kernel!(kernel, field.values, result)
+        bls = Int(ceil(length(result) / ths))
+        @cuda threads=ths blocks=bls cuda_wrap_kernel(kernel, result, args)
     else
-        for i = 1 : field.grid.N
-            @inbounds result[i] = kernel(field.values, i)
+        for i = 1 : length(result)
+            kernel(i, result, args)
         end
     end
-end
-
-function run()
-
-    println("Hit c for cuda...")
-    c = readline()
-    useCUDA = c == "c"
-
-    grid = CartesianGrid(10, 100.0, 0.0)
-
-    fieldValues = collect(1.0:grid.N)
-    if useCUDA
-        fieldValues = CuArray(fieldValues)
-    end
-    field = Field(fieldValues, grid)
-
-    result = similar(field.values)
-
-    println("before: ", field.values)
-    gridloop(kernel, field, result)
-    println("after:  ", result)
-end
-
-mutable struct CartesianGrid
-    N :: Int64   # number of cells
-    L :: Float64 # domain size
-    Δ :: Float64 # grid spacing
-end
-
-function CartesianGrid(nCells, length)
-    return CartesianGrid(nCells, length, length/nCells)
-end
-
-mutable struct Field
-    values :: AbstractArray{Float64}
-    grid :: CartesianGrid
-end
-
-
-@inline function kernel(ξ, i)
-    return 2 * ξ[i]
 end
