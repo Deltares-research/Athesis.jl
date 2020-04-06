@@ -76,14 +76,14 @@ function cuda_wrap_kernel(result, kernel, input)
     return nothing
 end
 
+function gridloop(result::CuArray, kernel, input)
+    ths = 256
+    bls = Int(ceil(length(result) / ths))
+    @cuda threads=ths blocks=bls cuda_wrap_kernel(result, kernel, input)
+end
+
 function gridloop(result, kernel, input)
-    if result isa CuArray
-        ths = 256
-        bls = Int(ceil(length(result) / ths))
-        @cuda threads=ths blocks=bls cuda_wrap_kernel(result, kernel, input)
-    else
-        for i = 1 : length(result)
-            kernel(i, result, input)
-        end
+    for i = 1 : length(result)
+        kernel(i, result, input)
     end
 end
