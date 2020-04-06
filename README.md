@@ -18,3 +18,4 @@ Depending on the argument, 8 methods can be invoked
   - (diagonally-)implicit advection, explicit diffusion
   - (diagonally-)implicit advection, explicit diffusion
   - (diagonally-)implicit advection, (diagonally-)implicit diffusion
+- <b>loopabstraction</b> prototypes the framework to run loops over the grid on both the CPU and GPU efficiently
