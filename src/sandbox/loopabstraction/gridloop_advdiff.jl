@@ -124,7 +124,7 @@ function cuda_wrap_kernel(kernel::Function, result::AbstractArray{Float64}, stat
 
     ix = (blockIdx().x-1)*blockDim().x  + threadIdx().x
     iy = (blockIdx().y-1)*blockDim().y  + threadIdx().y
-    if (ix <= nx && iy && ny)
+    if (ix > 1 && ix < nx && iy > 1 && iy < ny)
         kernel((ix,iy), result, state, args)
     end
     return nothing
@@ -198,3 +198,30 @@ end
 #     u = vec(u)
 #     v = vec(v)
 # end
+
+function gridloop(kernel::Function, result::AbstractArray{Float64}, state, args)
+    nx = args[5]
+    ny = args[6]
+    result = reshape(result, (nx,ny))
+    h = state[1]
+    u = state[2]
+    v = state[3]
+    h = reshape(h, (nx,ny))
+    u = reshape(u, (nx,ny))
+    v = reshape(v, (nx,ny))
+    state = (h,u,v)
+
+    if result isa CuArray
+        ths = 256
+        bls = Int(ceil(length(result) / ths))
+        @cuda threads=ths blocks=bls cuda_wrap_kernel(kernel, result, state, args)
+    else
+        for i = 1 : length(result)
+            kernel(i, result, state, args)
+        end
+    end
+    result = vec(result)
+    h = vec(h)
+    u = vec(u)
+    v = vec(v)
+end
