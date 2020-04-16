@@ -127,59 +127,11 @@ function cuda_wrap_kernel(kernel::Function, result::AbstractArray{Float64}, stat
     if (ix <= nx && iy && ny)
         kernel((ix,iy), result, state, args)
     end
-
-    iy = blockDim().y * (blockIdx().y - 1) + threadIdx().y;
-    idx = size(u,1)*(iy-1) + ix
-    if ix < size(u,1) + 1 && iy < size(u,2) + 1
-        @inbounds w[idx] = abs(v[ix,iy] - u[ix,iy])
-    end
-
     return nothing
 end
 
-# function gridloop(kernel::Function, result::CuArray{Float64}, state, args)
-#     # Grid loop for normal arrays on CPU for CUarrays (CUDA)
-#     nx = args[5]
-#     ny = args[6]
-#     result = reshape(result, (nx,ny))
-#     h = state[1]
-#     u = state[2]
-#     v = state[3]
-#     h = reshape(h, (nx,ny))
-#     u = reshape(u, (nx,ny))
-#     v = reshape(v, (nx,ny))
-#     state = (h,u,v)
-#
-#     ths = 256
-#     bls = Int(ceil(length(result) / ths))
-#     @cuda threads=ths blocks=bls cuda_wrap_kernel(kernel, result, state, args)
-# end
-#
-# function gridloop(kernel::Function, result::Array{Float64}, state, args)
-#     # Grid loop for normal arrays on CPU for normal arrays
-#     nx = args[5]
-#     ny = args[6]
-#     result = reshape(result, (nx,ny))
-#     h = state[1]
-#     u = state[2]
-#     v = state[3]
-#     h = reshape(h, (nx,ny))
-#     u = reshape(u, (nx,ny))
-#     v = reshape(v, (nx,ny))
-#     state = (h,u,v)
-#
-#     for j = 2:ny-1
-#         for i = 2:nx-1
-#             kernel((i,j), result, state, args)
-#         end
-#     end
-#     result = vec(result)
-#     h = vec(h)
-#     u = vec(u)
-#     v = vec(v)
-# end
-
-function gridloop(kernel::Function, result::AbstractArray{Float64}, args)
+function gridloop(kernel::Function, result::CuArray{Float64}, state, args)
+    # Grid loop for normal arrays on CPU for CUarrays (CUDA)
     nx = args[5]
     ny = args[6]
     result = reshape(result, (nx,ny))
@@ -191,13 +143,27 @@ function gridloop(kernel::Function, result::AbstractArray{Float64}, args)
     v = reshape(v, (nx,ny))
     state = (h,u,v)
 
-    if result isa CuArray
-        ths = 256
-        bls = Int(ceil(length(result) / ths))
-        @cuda threads=ths blocks=bls cuda_wrap_kernel(kernel, result, args)
-    else
-        for i = 1 : length(result)
-            kernel(i, result, args)
+    ths = 256
+    bls = Int(ceil(length(result) / ths))
+    @cuda threads=ths blocks=bls cuda_wrap_kernel(kernel, result, state, args)
+end
+
+function gridloop(kernel::Function, result::Array{Float64}, state, args)
+    # Grid loop for normal arrays on CPU for normal arrays
+    nx = args[5]
+    ny = args[6]
+    result = reshape(result, (nx,ny))
+    h = state[1]
+    u = state[2]
+    v = state[3]
+    h = reshape(h, (nx,ny))
+    u = reshape(u, (nx,ny))
+    v = reshape(v, (nx,ny))
+    state = (h,u,v)
+
+    for j = 2:ny-1
+        for i = 2:nx-1
+            kernel((i,j), result, state, args)
         end
     end
     result = vec(result)
@@ -205,3 +171,30 @@ function gridloop(kernel::Function, result::AbstractArray{Float64}, args)
     u = vec(u)
     v = vec(v)
 end
+
+# function gridloop(kernel::Function, result::AbstractArray{Float64}, state, args)
+#     nx = args[5]
+#     ny = args[6]
+#     result = reshape(result, (nx,ny))
+#     h = state[1]
+#     u = state[2]
+#     v = state[3]
+#     h = reshape(h, (nx,ny))
+#     u = reshape(u, (nx,ny))
+#     v = reshape(v, (nx,ny))
+#     state = (h,u,v)
+#
+#     if result isa CuArray
+#         ths = 256
+#         bls = Int(ceil(length(result) / ths))
+#         @cuda threads=ths blocks=bls cuda_wrap_kernel(kernel, result, args)
+#     else
+#         for i = 1 : length(result)
+#             kernel(i, result, args)
+#         end
+#     end
+#     result = vec(result)
+#     h = vec(h)
+#     u = vec(u)
+#     v = vec(v)
+# end
