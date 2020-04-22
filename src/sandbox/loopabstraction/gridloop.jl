@@ -46,7 +46,15 @@ function run()
     end
     println("result composed:  ", result[1:10])
 
+    # and as a nested loop...:
+    fill!(result, 0.0)
+    @timeit to "nested "*backendname(useCUDA) begin
+    gridloop_nested(result, (kernel_multby2,kernel_mean), ((fieldA),(fieldA, fieldB)))
+    end
+    println("result nested:  ", result[1:10])
+
     print_timer(to)
+
 
 end
 
@@ -85,5 +93,21 @@ end
 function gridloop(result, kernel, input)
     for i = 1 : length(result)
         kernel(i, result, input)
+    end
+end
+
+function gridloop_nested(result, kernels, args)
+    for i = 1 : length(result)
+        for k = 1 : length(kernels)
+            kernels[k](i, result, args[k])
+        end
+    end
+end
+
+function gridloop_nested(result::CuArray, kernels, args)
+    ths = 256
+    bls = Int(ceil(length(result) / ths))
+    for k = 1 : length(kernels)
+        @cuda threads=ths blocks=bls cuda_wrap_kernel(result, kernels[k], args[k])
     end
 end
