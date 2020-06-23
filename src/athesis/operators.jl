@@ -13,13 +13,13 @@
 ############### 2d difference operators ##################
 # Difference operators in x- and y-direction:
 # Central-x
-@inline δfδx_2dᶜ(f,i,j,Δx) = (f[i+1,j] - f[i-1,j])/Δx
+@inline δfδx_2dᶜ(f,i,j,Δx) = (f[i+1,j] - f[i-1,j])/(2Δx)
 # Upwind-x
 @inline δfδx_2dᵘ(f,i,j,Δx) = (f[i,j] - f[i-1,j])/Δx
 # Downwind-x
 @inline δfδx_2dᵈ(f,i,j,Δx) = (f[i+1,j] - f[i,j])/Δx
 # Central-y
-@inline δfδy_2dᶜ(f,i,j,Δy) = (f[i,j+1] - f[i,j-1])/Δy
+@inline δfδy_2dᶜ(f,i,j,Δy) = (f[i,j+1] - f[i,j-1])/(2Δy)
 # Upwind-y
 @inline δfδy_2dᵘ(f,i,j,Δy) = (f[i,j] - f[i,j-1])/Δy
 # Downwind-y
@@ -28,19 +28,19 @@
 ############### 3d difference operators ##################
 # Difference operators in x- and y-direction:
 # Central-x
-@inline δfδx_3dᶜ(f,i,j,k,Δx)  = (f[i+1,j,k] - f[i-1,j,k])/Δx
+@inline δfδx_3dᶜ(f,i,j,k,Δx)  = (f[i+1,j,k] - f[i-1,j,k])/(2Δx)
 # Upwind-x
 @inline δfδx_3dᵘ(f,i,j,k,Δx)   = (f[i,j,k] - f[i-1,j,k])/Δx
 # Downwind-x
 @inline δfδx_3dᵈ(f,i,j,k,Δx) = (f[i+1,j,k] - f[i,j,k])/Δx
-# Central-y
-@inline δfδy_3dᶜ(f,i,j,k,Δy)  = (f[i,j+1,k] - f[i,j-1,k])/Δy
+# Central-y)
+@inline δfδy_3dᶜ(f,i,j,k,Δy)  = (f[i,j+1,k] - f[i,j-1,k])/(2Δy)
 # Upwind-y
 @inline δfδy_3dᵘ(f,i,j,k,Δy)   = (f[i,j,k] - f[i,j-1,k])/Δy
 # Downwind-y
 @inline δfδy_3dᵈ(f,i,j,k,Δy) = (f[i,j+1,k] - f[i,j,k])/Δy
 # Central-z
-@inline δfδz_3dᶜ(f,i,j,k,Δz)  = (f[i,j,k+1] - f[i,j,k-1])/Δz
+@inline δfδz_3dᶜ(f,i,j,k,Δz)  = (f[i,j,k+1] - f[i,j,k-1])/(2Δz)
 # Upwind-z
 @inline δfδz_3dᵘ(f,i,j,k,Δz)   = (f[i,j,k] - f[i,j,k-1])/Δz
 # Downwind-z

@@ -27,33 +27,33 @@ mutable struct ModelComponents
     sources::Bool
 end
 
-mutable struct State2dh #{T}
-    h::AbstractArray{Float64,2}
-    u::AbstractArray{Float64,2}
-    v::AbstractArray{Float64,2}
-    hⁿ⁺¹::AbstractArray{Float64,2}
-    uⁿ⁺¹::AbstractArray{Float64,2}
-    vⁿ⁺¹::AbstractArray{Float64,2}
+mutable struct State2dh{T}
+    h::T
+    u::T
+    v::T
+    hⁿ⁺¹::T
+    uⁿ⁺¹::T
+    vⁿ⁺¹::T
 end
 
-mutable struct State2dv #{T}
-    h::AbstractArray{Float64,2}
-    u::AbstractArray{Float64,2}
-    w::AbstractArray{Float64,2}
-    hⁿ⁺¹::AbstractArray{Float64,2}
-    uⁿ⁺¹::AbstractArray{Float64,2}
-    wⁿ⁺¹::AbstractArray{Float64,2}
+mutable struct State2dv{T}
+    h::T
+    u::T
+    w::T
+    hⁿ⁺¹::T
+    uⁿ⁺¹::T
+    wⁿ⁺¹::T
 end
 
-mutable struct State3d #{T}
-    h::AbstractArray{Float64,3}
-    u::AbstractArray{Float64,3}
-    v::AbstractArray{Float64,3}
-    w::AbstractArray{Float64,3}
-    hⁿ⁺¹::AbstractArray{Float64,3}
-    uⁿ⁺¹::AbstractArray{Float64,3}
-    vⁿ⁺¹::AbstractArray{Float64,3}
-    wⁿ⁺¹::AbstractArray{Float64,3}
+mutable struct State3d{T}
+    h::T
+    u::T
+    v::T
+    w::T
+    hⁿ⁺¹::T
+    uⁿ⁺¹::T
+    vⁿ⁺¹::T
+    wⁿ⁺¹::T
 end
 
 abstract type Source end

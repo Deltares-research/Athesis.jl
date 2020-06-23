@@ -18,18 +18,18 @@ include("grids.jl")
 # externals  = source
 # source     = (i_src, j_src, n_src, externals) or (i_src, j_src, k_src, n_src, externals)
 
-function cuda_wrap_kernel(kernel::Function,
-                          source::CuArray{Float64,2},
-                          h::CuArray{Float64,2},
-                          u::CuArray{Float64,2},
-                          v::CuArray{Float64,2},
-                          hⁿ⁺¹::CuArray{Float64,2},
-                          uⁿ⁺¹::CuArray{Float64,2},
-                          vⁿ⁺¹::CuArray{Float64,2},
-                          Δx::Float64,
-                          Δy::Float64,
-                          Δt::Float64,
-                          K::CuArray{Float64,2})
+function cuda_wrap_kernel!(kernel::Function,
+                           source::CuArray{Float64,2},
+                           h::CuArray{Float64,2},
+                           u::CuArray{Float64,2},
+                           v::CuArray{Float64,2},
+                           hⁿ⁺¹::CuArray{Float64,2},
+                           uⁿ⁺¹::CuArray{Float64,2},
+                           vⁿ⁺¹::CuArray{Float64,2},
+                           Δx::Float64,
+                           Δy::Float64,
+                           Δt::Float64,
+                           K::CuArray{Float64,2})
 
     # 2DH implementation
 
@@ -42,34 +42,20 @@ function cuda_wrap_kernel(kernel::Function,
     return nothing
 end
 
-function cuda_wrap_kernel(kernel::Function,
-                          source::CuArray{Float64,2},
-                          h::CuArray{Float64,2},
-                          u::CuArray{Float64,2},
-                          w::CuArray{Float64,2},
-                          hⁿ⁺¹::CuArray{Float64,2},
-                          uⁿ⁺¹::CuArray{Float64,2},
-                          wⁿ⁺¹::CuArray{Float64,2},
-                          Δx::Float64,
-                          Δz::Float64,
-                          Δt::Float64,
-                          K::CuArray{Float64,2})
+function cuda_wrap_kernel!(kernel::Function,
+                           source::CuArray,
+                           h::CuArray,
+                           u::CuArray,
+                           w::CuArray,
+                           hⁿ⁺¹::CuArray,
+                           uⁿ⁺¹::CuArray,
+                           wⁿ⁺¹::CuArray,
+                           Δx::Float64,
+                           Δz::Float64,
+                           Δt::Float64,
+                           K::CuArray)
 
     # 2DV implementation
-
-    # Unpack required variables
-    nx    = grid.nx
-    nz    = grid.nz
-    Δx    = grid.Δx
-    Δz    = grid.Δz
-    Δt    = time_data.Δt
-    h     = state.h
-    u     = state.u
-    w     = state.w
-    hⁿ⁺¹  = state.hⁿ⁺¹
-    uⁿ⁺¹  = state.uⁿ⁺¹
-    wⁿ⁺¹  = state.wⁿ⁺¹
-    K     = parameters.K
 
     ix = (blockIdx().x-1)*blockDim().x  + threadIdx().x
     iy = (blockIdx().y-1)*blockDim().y  + threadIdx().y
@@ -80,21 +66,21 @@ function cuda_wrap_kernel(kernel::Function,
     return nothing
 end
 
-function cuda_wrap_kernel(kernel::Function,
-                          source::CuArray{Float64,3},
-                          h::CuArray{Float64,3},
-                          u::CuArray{Float64,3},
-                          v::CuArray{Float64,3},
-                          w::CuArray{Float64,3},
-                          hⁿ⁺¹::CuArray{Float64,3},
-                          uⁿ⁺¹::CuArray{Float64,3},
-                          vⁿ⁺¹::CuArray{Float64,3},
-                          wⁿ⁺¹::CuArray{Float64,3},
-                          Δx::Float64,
-                          Δy::Float64,
-                          Δz::Float64,
-                          Δt::Float64,
-                          K::CuArray{Float64,3})
+function cuda_wrap_kernel!(kernel::Function,
+                           source::CuArray,
+                           h::CuArray,
+                           u::CuArray,
+                           v::CuArray,
+                           w::CuArray,
+                           hⁿ⁺¹::CuArray,
+                           uⁿ⁺¹::CuArray,
+                           vⁿ⁺¹::CuArray,
+                           wⁿ⁺¹::CuArray,
+                           Δx::Float64,
+                           Δy::Float64,
+                           Δz::Float64,
+                           Δt::Float64,
+                           K::CuArray)
 
     # 3D implementation
 
@@ -112,12 +98,12 @@ function cuda_wrap_kernel(kernel::Function,
 end
 
 #function gridloop(kernel::Function, result::CuArray{Float64}, state, args)
-function gridloop(kernel::Function,
-                  source::CuArray{Float64,2},
-                  state::State2dh, # , u::CuArray{Float64}, v::CuArray{Float64}, hⁿ⁺¹::CuArray{Float64}, uⁿ⁺¹::CuArray{Float64}, vⁿ⁺¹::CuArray{Float64},
-                  grid::Grid2dh, #ndim::Int64, nx::Int64, ny::Int64, Δx::Float64, Δy::Float64, x::CuArray{Float64}, y::CuArray{Float64},
-                  parameters::Parameters, #
-                  time_data::Time_data) #Δt::Float64, tend::Float64)
+function gridloop!(kernel::Function,
+                   source::CuArray,
+                   state::State2dh, # , u::CuArray{Float64}, v::CuArray{Float64}, hⁿ⁺¹::CuArray{Float64}, uⁿ⁺¹::CuArray{Float64}, vⁿ⁺¹::CuArray{Float64},
+                   grid::Grid2dh, #ndim::Int64, nx::Int64, ny::Int64, Δx::Float64, Δy::Float64, x::CuArray{Float64}, y::CuArray{Float64},
+                   parameters::Parameters, #
+                   time_data::Time_data) #Δt::Float64, tend::Float64)
     # Grid loop on CPU for CUarrays (CUDA)
     # 2DH implementation
 
@@ -137,15 +123,15 @@ function gridloop(kernel::Function,
 
     ths = 256
     bls = Int(ceil(length(h) / ths))
-    @cuda threads=ths blocks=bls cuda_wrap_kernel(kernel, source, h, u, v, hⁿ⁺¹, uⁿ⁺¹, vⁿ⁺¹, Δx, Δy, Δt, K)
+    @cuda threads=ths blocks=bls cuda_wrap_kernel!(kernel, source, h, u, v, hⁿ⁺¹, uⁿ⁺¹, vⁿ⁺¹, Δx, Δy, Δt, K)
 end
 
-function gridloop(kernel::Function,
-                  source::CuArray{Float64,2},
-                  state::State2dv, # , u::CuArray{Float64}, v::CuArray{Float64}, hⁿ⁺¹::CuArray{Float64}, uⁿ⁺¹::CuArray{Float64}, vⁿ⁺¹::CuArray{Float64},
-                  grid::Grid2dv, #ndim::Int64, nx::Int64, ny::Int64, Δx::Float64, Δy::Float64, x::CuArray{Float64}, y::CuArray{Float64},
-                  parameters::Parameters, #
-                  time_data::Time_data) #Δt::Float64, tend::Float64)
+function gridloop!(kernel::Function,
+                   source::CuArray,
+                   state::State2dv, # , u::CuArray{Float64}, v::CuArray{Float64}, hⁿ⁺¹::CuArray{Float64}, uⁿ⁺¹::CuArray{Float64}, vⁿ⁺¹::CuArray{Float64},
+                   grid::Grid2dv, #ndim::Int64, nx::Int64, ny::Int64, Δx::Float64, Δy::Float64, x::CuArray{Float64}, y::CuArray{Float64},
+                   parameters::Parameters, #
+                   time_data::Time_data) #Δt::Float64, tend::Float64)
     # Grid loop on CPU for CUarrays (CUDA)
     # 2DV implementation
 
@@ -165,15 +151,15 @@ function gridloop(kernel::Function,
 
     ths = 256
     bls = Int(ceil(length(h) / ths))
-    @cuda threads=ths blocks=bls cuda_wrap_kernel(kernel, source, h, u, w, hⁿ⁺¹, uⁿ⁺¹, wⁿ⁺¹, Δx, Δz, Δt, K)
+    @cuda threads=ths blocks=bls cuda_wrap_kernel!(kernel, source, h, u, w, hⁿ⁺¹, uⁿ⁺¹, wⁿ⁺¹, Δx, Δz, Δt, K)
 end
 
-function gridloop(kernel::Function,
-                  source::CuArray{Float64,3},
-                  state::State3d, # , u::CuArray{Float64}, v::CuArray{Float64}, hⁿ⁺¹::CuArray{Float64}, uⁿ⁺¹::CuArray{Float64}, vⁿ⁺¹::CuArray{Float64},
-                  grid::Grid3d, #ndim::Int64, nx::Int64, ny::Int64, Δx::Float64, Δy::Float64, x::CuArray{Float64}, y::CuArray{Float64},
-                  parameters::Parameters, #
-                  time_data::Time_data)
+function gridloop!(kernel::Function,
+                   source::CuArray,
+                   state::State3d, # , u::CuArray{Float64}, v::CuArray{Float64}, hⁿ⁺¹::CuArray{Float64}, uⁿ⁺¹::CuArray{Float64}, vⁿ⁺¹::CuArray{Float64},
+                   grid::Grid3d, #ndim::Int64, nx::Int64, ny::Int64, Δx::Float64, Δy::Float64, x::CuArray{Float64}, y::CuArray{Float64},
+                   parameters::Parameters, #
+                   time_data::Time_data)
     # Grid loop on CPU for CUarrays (CUDA)
     # 3D implementation
 
@@ -196,15 +182,15 @@ function gridloop(kernel::Function,
 
     ths = 256
     bls = Int(ceil(length(h) / ths))
-    @cuda threads=ths blocks=bls cuda_wrap_kernel(kernel, source, h, u, v, w, hⁿ⁺¹, uⁿ⁺¹, vⁿ⁺¹, wⁿ⁺¹, Δx, Δy, Δz, Δt, K)
+    @cuda threads=ths blocks=bls cuda_wrap_kernel!(kernel, source, h, u, v, w, hⁿ⁺¹, uⁿ⁺¹, vⁿ⁺¹, wⁿ⁺¹, Δx, Δy, Δz, Δt, K)
 end
 
-function gridloop(kernel::Function,
-                  source::Array{Float64,2},
-                  state::State2dh, # , u::CuArray{Float64}, v::CuArray{Float64}, hⁿ⁺¹::CuArray{Float64}, uⁿ⁺¹::CuArray{Float64}, vⁿ⁺¹::CuArray{Float64},
-                  grid::Grid2dh, #ndim::Int64, nx::Int64, ny::Int64, Δx::Float64, Δy::Float64, x::CuArray{Float64}, y::CuArray{Float64},
-                  parameters::Parameters, #
-                  time_data::Time_data)
+function gridloop!(kernel::Function,
+                   source::Array{Float64,2},
+                   state::State2dh, # , u::CuArray{Float64}, v::CuArray{Float64}, hⁿ⁺¹::CuArray{Float64}, uⁿ⁺¹::CuArray{Float64}, vⁿ⁺¹::CuArray{Float64},
+                   grid::Grid2dh, #ndim::Int64, nx::Int64, ny::Int64, Δx::Float64, Δy::Float64, x::CuArray{Float64}, y::CuArray{Float64},
+                   parameters::Parameters, #
+                   time_data::Time_data)
     # Grid loop for normal arrays on CPU for normal arrays
 
     # 2DH implementation
@@ -230,7 +216,7 @@ function gridloop(kernel::Function,
     end
 end
 
-function gridloop(kernel::Function,
+function gridloop!(kernel::Function,
                   source::Array{Float64,2},
                   state::State2dv, # , u::CuArray{Float64}, v::CuArray{Float64}, hⁿ⁺¹::CuArray{Float64}, uⁿ⁺¹::CuArray{Float64}, vⁿ⁺¹::CuArray{Float64},
                   grid::Grid2dv, #ndim::Int64, nx::Int64, ny::Int64, Δx::Float64, Δy::Float64, x::CuArray{Float64}, y::CuArray{Float64},
@@ -261,12 +247,12 @@ function gridloop(kernel::Function,
     end
 end
 
-function gridloop(kernel::Function,
-                  source::Array{Float64,3},
-                  state::State3d, # , u::CuArray{Float64}, v::CuArray{Float64}, hⁿ⁺¹::CuArray{Float64}, uⁿ⁺¹::CuArray{Float64}, vⁿ⁺¹::CuArray{Float64},
-                  grid::Grid3d, #ndim::Int64, nx::Int64, ny::Int64, Δx::Float64, Δy::Float64, x::CuArray{Float64}, y::CuArray{Float64},
-                  parameters::Parameters, #
-                  time_data::Time_data)
+function gridloop!(kernel::Function,
+                   source::Array{Float64,3},
+                   state::State3d, # , u::CuArray{Float64}, v::CuArray{Float64}, hⁿ⁺¹::CuArray{Float64}, uⁿ⁺¹::CuArray{Float64}, vⁿ⁺¹::CuArray{Float64},
+                   grid::Grid3d, #ndim::Int64, nx::Int64, ny::Int64, Δx::Float64, Δy::Float64, x::CuArray{Float64}, y::CuArray{Float64},
+                   parameters::Parameters, #
+                   time_data::Time_data)
     # Grid loop for normal arrays on CPU for normal arrays
 
     # 3D implementation
