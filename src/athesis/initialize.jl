@@ -78,10 +78,14 @@ function init_model_state(grid::Grid3d, h0, u0, v0, w0, useCUDA)
 
     if useCUDA
         # Convert to CUDA Arrays
-        h = adapt(CuArray,h)
-        u = adapt(CuArray,u)
-        v = adapt(CuArray,v)
-        w = adapt(CuArray,w)
+        # h = adapt(CuArray,h)
+        # u = adapt(CuArray,u)
+        # v = adapt(CuArray,v)
+        # w = adapt(CuArray,w)
+        h = CuArray(h)
+        u = CuArray(u)
+        v = CuArray(v)
+        w = CuArray(w)
     end
 
     # Copy the state to the updated state

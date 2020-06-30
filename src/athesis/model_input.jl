@@ -107,7 +107,7 @@ function model_input()
     j_src  = 10
     k_src  = 2
     duration = 1000.0
-    source = 5.0e-1
+    source = 0.1
 
     # Simulation end time
     tend = 400000.0
