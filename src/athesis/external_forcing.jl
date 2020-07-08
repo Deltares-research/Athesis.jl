@@ -20,6 +20,7 @@ function set_sources!(time, source)
     j_src = source.j_src
     k_src = source.k_src
     duration = source.duration
+    source.external_source .= 0.0
     if time < duration
         # Set a single source of at the prescribed point
         source.external_source[i_src, j_src, k_src] = source.discharge
