@@ -2,31 +2,8 @@
 
 using Adapt
 
-mutable struct Grid2dh{T}
+mutable struct Grid{T}
     #grid_type::String
-    ndim::Int64
-    nx::Int64
-    ny::Int64
-    Δx::Float64
-    Δy::Float64
-    x::T
-    y::T
-end
-
-mutable struct Grid2dv{T}
-    #grid_type::String
-    ndim::Int64
-    nx::Int64
-    nz::Int64
-    Δx::Float64
-    Δz::Float64
-    x::T
-    z::T
-end
-
-mutable struct Grid3d{T}
-    #grid_type::String
-    ndim::Int64
     nx::Int64
     ny::Int64
     nz::Int64
@@ -36,30 +13,6 @@ mutable struct Grid3d{T}
     x::T
     y::T
     z::T
-end
-
-
-function grid_coords(n1, n2, Δ1, Δ2, useCUDA)
-    # Create 2D structured grid (2DH or 2DV)
-    # For now cell centered
-    coord1 = Array{Float64,1}(undef,n1)
-    for n = 1:n1
-        coord1[n] = (n-0.5)*Δ1
-    end
-
-    coord2 = Array{Float64,1}(undef,n2)
-    for n = 1:n2
-        coord2[n] = (n-0.5)*Δ2
-    end
-
-    if useCUDA
-        # Convert to CUDA Arrays
-        println(typeof(coord1))
-        coord1 = adapt(CuArray,coord1)
-        coord2 = adapt(CuArray,coord2)
-        println(typeof(coord1))
-    end
-    return coord1, coord2
 end
 
 function grid_coords(n1, n2, n3, Δ1, Δ2, Δ3, useCUDA)

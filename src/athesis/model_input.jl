@@ -1,73 +1,28 @@
 # model_input.jl
-using Adapt
 
-abstract type ModelInput end
-
-struct Model_input_2dh <: ModelInput
-    model_type::String
-    useCUDA::Bool
-    #data_type #::AbstractArray
-    ndim::Int64
-    nx::Int64
-    ny::Int64
-    Δx::Float64
-    Δy::Float64
-    Δt::Float64
-    tend::Float64
-    K0::Float64
-    h0::Float64
-    u0::Float64
-    v0::Float64
-    source::Float64
-    i_src::Int64
-    j_src::Int64
-    duration::Float64
-end
-
-struct Model_input_2dv <: ModelInput
-    model_type::String
+struct Model_input
     useCUDA::Bool
     #data_type
-    ndim::Int64
-    nx::Int64
-    nz::Int64
-    Δx::Float64
-    Δz::Float64
-    Δt::Float64
-    tend::Float64
-    K0::Float64
-    h0::Float64
-    u0::Float64
-    w0::Float64
-    source::Float64
-    i_src::Int64
-    k_src::Int64
-    duration::Float64
-end
-
-struct Model_input_3d <: ModelInput
-    model_type::String
-    useCUDA::Bool
-    #data_type
-    ndim::Int64
     nx::Int64
     ny::Int64
     nz::Int64
-    Δx::Float64
-    Δy::Float64
-    Δz::Float64
-    Δt::Float64
-    tend::Float64
-    K0::Float64
-    h0::Float64
-    u0::Float64
-    v0::Float64
-    w0::Float64
-    source::Float64
+    Δx::AbstractFloat
+    Δy::AbstractFloat
+    Δz::AbstractFloat
+    Δt::AbstractFloat
+    tend::AbstractFloat
+    K0::AbstractFloat
+    h0::AbstractFloat
+    u0::AbstractFloat
+    v0::AbstractFloat
+    w0::AbstractFloat
+    source::AbstractFloat
     i_src::Int64
     j_src::Int64
     k_src::Int64
-    duration::Float64
+    duration::AbstractFloat
+    const_recharge::AbstractFloat
+    recharge_factor::AbstractFloat
 end
 
 #
@@ -78,38 +33,51 @@ function model_input()
 
     println("Reading model input ...")
 
-    model_type = "3D" # in large caps, please!
-
-    # Model size per dimension
-    nx   = 40
-    ny   = 20
+    # Model size per dimension (-)
+    nx   = 100
+    ny   = 100
     nz   = 10
 
-    # Grid sizes
-    Δx   = 10.0
-    Δy   = 10.0
-    Δz   = 10.0
+    # Grid sizes (m)
+    Δx   = 0.8
+    Δy   = 0.8
+    Δz   = 1.0
 
-    # Time step
-    Δt   = 50.0
+    # Time step (s)
+    Δt   = 5.0
 
-    # hydraulic_conductivity
-    K0   = 1.0e-2
+    # hydraulic_conductivity (m/s)
+    K0   = 1.0e-4
 
     # Initial condition
-    h0   = 10.0
-    u0   = 0.0
-    v0   = 0.0
-    w0   = 0.0
+    h0   = 10.0    # (m)
+    u0   = 0.0     # (m/s)
+    v0   = 0.0     # (m/s)
+    w0   = 0.0     # (m/s)
 
-    # Source/discharge data
+    # Source (well) data
     i_src  = 30
     j_src  = 10
     k_src  = 2
-    duration = 1000.0
-    source = 0.1
+    duration = 0.0  # (s)
+    source = 0.0    # (m3/s)
 
-    # Simulation end time
+    # Rescharge data
+    # QR_nb = I_nb * M_nb * A_n
+    # with QR_nb in (L^3/T, or m3/s)
+    # I is the unit rescharge flux (m/s)
+    # A is the cell area for cell n
+    # M is a multiplier/factor
+    const_recharge = 5.0e-4    # (m3/s)
+    recharge_factor = 1.0      # (-)
+
+    # Test model:
+    # 9 x 9 x 3: storage = 0.1x10-4
+    # dx = dy = 10 m, dz = variable
+    # recharge (N) of 5e-4
+    # tend = 1Y (1D)?, dt = large
+
+    # Simulation end time (s)
     tend = 400000.0
 
     # Backend selection
@@ -125,18 +93,7 @@ function model_input()
     # end
 
     # Store the input in tuple "input"
-    if model_type == "2DH"
-        ndim = 2
-        println("Grid specified: ", model_type, " grid with\n nx = ", nx, ",\n ny = ", ny, " and\n Δx = ", Δx, ",\n Δy = ", Δy)
-        input = Model_input_2dh(model_type, useCUDA, ndim, nx, ny, Δx, Δy, Δt, tend, K0, h0, u0, v0, source, i_src, j_src, duration)
-    elseif model_type == "2DV"
-        ndim = 2
-        println("Grid specified: ", model_type, " grid with\n nx = ", nx, ",\n nz = ", nz, " and\n Δx = ", Δx, ",\n Δz = ", Δz)
-        input = Model_input_2dv(model_type, useCUDA, ndim, nx, nz, Δx, Δz, Δt, tend, K0, h0, u0, w0, source, i_src, k_src, duration)
-    elseif model_type == "3D"
-        ndim = 3
-        println("Grid specified: ", model_type, " grid with\n nx = ", nx, ",\n ny = ", ny, ",\n nz = ", nz, " and\n Δx = ", Δx, ",\n Δy = ", Δy, ",\n Δz = ", Δz)
-        input = Model_input_3d(model_type, useCUDA, ndim, nx, ny, nz, Δx, Δy, Δz, Δt, tend, K0, h0, u0, v0, w0, source, i_src, j_src, k_src, duration)
-    end
+    println("Grid specified: 3D grid with\n nx = ", nx, ",\n ny = ", ny, ",\n nz = ", nz, " and\n Δx = ", Δx, ",\n Δy = ", Δy, ",\n Δz = ", Δz)
+    input = Model_input(useCUDA, nx, ny, nz, Δx, Δy, Δz, Δt, tend, K0, h0, u0, v0, w0, source, i_src, j_src, k_src, duration, const_recharge, recharge_factor)
 
 end

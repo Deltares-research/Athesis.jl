@@ -4,15 +4,15 @@ abstract type Modeltype
 end
 
 
-mutable struct Parameters #{T}
-    K::AbstractArray{Float64}
+mutable struct Parameters{T}
+    K::T
     #Δt::Float64
 end
 
-mutable struct Physics #{T}
-    g::Float64
-    nuₕ::AbstractArray{Float64}
-    nuᵥ::AbstractArray{Float64}
+mutable struct Physics{T}
+    g::AbstractFloat
+    nuₕ::T
+    nuᵥ::T
 end
 
 mutable struct ModelComponents
@@ -27,25 +27,7 @@ mutable struct ModelComponents
     sources::Bool
 end
 
-mutable struct State2dh{T}
-    h::T
-    u::T
-    v::T
-    hⁿ⁺¹::T
-    uⁿ⁺¹::T
-    vⁿ⁺¹::T
-end
-
-mutable struct State2dv{T}
-    h::T
-    u::T
-    w::T
-    hⁿ⁺¹::T
-    uⁿ⁺¹::T
-    wⁿ⁺¹::T
-end
-
-mutable struct State3d{T}
+mutable struct State{T}
     h::T
     u::T
     v::T
@@ -56,44 +38,33 @@ mutable struct State3d{T}
     wⁿ⁺¹::T
 end
 
-abstract type Source end
-
-mutable struct Source2dh <: Source # {T}
-    i_src::Int64
-    j_src::Int64
-    duration::Float64
-    discharge::Float64
-    external_source::AbstractArray{Float64,2}
-end
-
-mutable struct Source2dv <: Source # {T}
-    i_src::Int64
-    k_src::Int64
-    duration::Float64
-    discharge::Float64
-    external_source::AbstractArray{Float64,2}
-end
-
-mutable struct Source3d <: Source # {T}
+mutable struct Source{T}
     i_src::Int64
     j_src::Int64
     k_src::Int64
-    duration::Float64
-    discharge::Float64
-    external_source::AbstractArray{Float64,3}
+    duration::AbstractFloat
+    discharge::AbstractFloat
+    external_source::T
+end
+
+mutable struct Recharge
+    #duration::AbstractFloat
+    const_recharge::AbstractFloat
+    recharge_flux::AbstractFloat
+    recharge_factor::AbstractFloat
 end
 
 mutable struct Model #{T}
     #modeltype::Modeltype
-    model_type::String
     #state::State
     source::Source
+    recharge::Recharge
 end
 
 mutable struct Time_data
-    Δt::Float64
-    tend::Float64
-    time::Float64
+    Δt::AbstractFloat
+    tend::AbstractFloat
+    time::AbstractFloat
     maxsteps::Int64
     #Courant::Float64
     #time_integration::String
@@ -110,5 +81,5 @@ end
 
 mutable struct Solver
     name::String
-    conv_limit::Float64
+    conv_limit::AbstractFloat
 end

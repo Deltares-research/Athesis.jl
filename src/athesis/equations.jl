@@ -7,12 +7,12 @@
 # - Darcy equation (velocity)
 
 # This is the present data storage:
-# grid       = (ndim, nx, ny, Δx, Δy, x, y) or (ndim, nx, ny, nz, Δx, Δy, Δz, x, y, z)
-# state      = (h, u, v, hⁿ⁺¹, uⁿ⁺¹, vⁿ⁺¹) or (h, u, v, w, hⁿ⁺¹, uⁿ⁺¹, vⁿ⁺¹, wⁿ⁺¹)
-# model      = externals
+# grid       = (nx, ny, nz, Δx, Δy, Δz, x, y, z)
+# state      = (h, u, v, w, hⁿ⁺¹, uⁿ⁺¹, vⁿ⁺¹, wⁿ⁺¹)
+# model      = externals, recharge
 # parameters = (K, Δt, tend)
 # externals  = source
-# source     = (i_src, j_src, n_src, externals) or (i_src, j_src, k_src, n_src, externals)
+# source     = (i_src, j_src, k_src, n_src, externals)
 
 include("gridloop.jl")
 include("kernels.jl")
@@ -20,11 +20,13 @@ include("kernels.jl")
 
 function pressure_equation!(grid, model, state, parameters, time_data)
 
-    # 3D implementation
     #println("   Solving the pressure equation ...")
 
     # Unpack only source to be able to dispatch on type (Array or CuArray)
-    source = model.source.external_source
+    source   = model.source.external_source
+
+    # Add the model recharge
+    source .+= model.recharge.recharge_flux
 
     # Solve for the pressure/head
     gridloop!(pressure_kernel!, source, state, grid, parameters, time_data)
