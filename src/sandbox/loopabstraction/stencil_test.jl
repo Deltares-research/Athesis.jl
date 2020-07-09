@@ -1,7 +1,7 @@
 # test stencil operator
 
 include("grids.jl")
-include("operators.jl")
+#include("operators.jl")
 
 abstract type Stencil end
 
