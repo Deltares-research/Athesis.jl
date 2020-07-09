@@ -1,6 +1,7 @@
 # test stencil operator
 
 include("grids.jl")
+include("operators.jl")
 
 abstract type Stencil end
 
@@ -82,7 +83,7 @@ end
     (i, j, k) = cell
     stencil = Array{Tuple,1}(undef,5)
     stencil[1] = (i-1, j  , k  )
-    stencil[1] = (i+1, j  , k  )
+    stencil[2] = (i+1, j  , k  )
     stencil[3] = (i  , j+1, k  )
     stencil[4] = (i  , j  , k-1)
     stencil[5] = (i  , j  , k+1)
@@ -94,7 +95,7 @@ end
     (i, j, k) = cell
     stencil = Array{Tuple,1}(undef,5)
     stencil[1] = (i-1, j  , k  )
-    stencil[1] = (i+1, j  , k  )
+    stencil[2] = (i+1, j  , k  )
     stencil[3] = (i  , j-1, k  )
     stencil[4] = (i  , j  , k-1)
     stencil[5] = (i  , j  , k+1)
@@ -213,6 +214,50 @@ end
     return stencil
 end
 
+# Stencil for top-west boundary cell
+@inline function get_stencil(cell, stencil_type::TopWestBoundaryCell)
+    (i, j, k) = cell
+    stencil = Array{Tuple,1}(undef,4)
+    stencil[1] = (i+1, j  , k  )
+    stencil[2] = (i  , j-1, k  )
+    stencil[3] = (i  , j+1, k  )
+    stencil[4] = (i  , j  , k-1)
+    return stencil
+end
+
+# Stencil for top-east boundary cell
+@inline function get_stencil(cell, stencil_type::TopEastBoundaryCell)
+    (i, j, k) = cell
+    stencil = Array{Tuple,1}(undef,4)
+    stencil[1] = (i-1, j  , k  )
+    stencil[2] = (i  , j-1, k  )
+    stencil[3] = (i  , j+1, k  )
+    stencil[4] = (i  , j  , k-1)
+    return stencil
+end
+
+# Stencil for top-south boundary cell
+@inline function get_stencil(cell, stencil_type::TopSouthBoundaryCell)
+    (i, j, k) = cell
+    stencil = Array{Tuple,1}(undef,4)
+    stencil[1] = (i-1, j  , k  )
+    stencil[2] = (i+1, j  , k  )
+    stencil[3] = (i  , j+1, k  )
+    stencil[4] = (i  , j  , k-1)
+    return stencil
+end
+
+# Stencil for top-north boundary cell
+@inline function get_stencil(cell, stencil_type::TopNorthBoundaryCell)
+    (i, j, k) = cell
+    stencil = Array{Tuple,1}(undef,4)
+    stencil[1] = (i-1, j  , k  )
+    stencil[2] = (i+1, j  , k  )
+    stencil[3] = (i  , j-1, k  )
+    stencil[4] = (i  , j  , k-1)
+    return stencil
+end
+
 # Stencil for bottom south-west boundary cell
 @inline function get_stencil(cell, stencil_type::BottomSouthWestBoundaryCell)
     (i, j, k) = cell
@@ -252,6 +297,49 @@ end
     stencil[3] = (i  , j  , k+1)
     return stencil
 end
+
+# Stencil for top south-west boundary cell
+@inline function get_stencil(cell, stencil_type::TopSouthWestBoundaryCell)
+    (i, j, k) = cell
+    stencil = Array{Tuple,1}(undef,3)
+    stencil[1] = (i+1, j  , k  )
+    stencil[2] = (i  , j+1, k  )
+    stencil[3] = (i  , j  , k-1)
+    return stencil
+end
+
+# Stencil for top south-east boundary cell
+@inline function get_stencil(cell, stencil_type::TopSouthEastBoundaryCell)
+    (i, j, k) = cell
+    stencil = Array{Tuple,1}(undef,3)
+    stencil[1] = (i-1, j  , k  )
+    stencil[2] = (i  , j+1, k  )
+    stencil[3] = (i  , j  , k-1)
+    return stencil
+end
+
+# Stencil for top north-west boundary cell
+@inline function get_stencil(cell, stencil_type::TopNorthWestBoundaryCell)
+    (i, j, k) = cell
+    stencil = Array{Tuple,1}(undef,3)
+    stencil[1] = (i+1, j  , k  )
+    stencil[2] = (i  , j-1, k  )
+    stencil[3] = (i  , j  , k-1)
+    return stencil
+end
+
+# Stencil for top north-east boundary cell
+@inline function get_stencil(cell, stencil_type::TopNorthEastBoundaryCell)
+    (i, j, k) = cell
+    stencil = Array{Tuple,1}(undef,3)
+    stencil[1] = (i-1, j  , k  )
+    stencil[2] = (i  , j-1, k  )
+    stencil[3] = (i  , j  , k-1)
+    return stencil
+end
+
+
+
 
 function set_stencil_type(grid) #, stencil_type)
 
@@ -329,15 +417,109 @@ function set_stencil_type(grid) #, stencil_type)
     return stencil_type
 end
 
+function kernel!(cell, h, hnew, K, neighbours)
+    (i, j, k ) = cell
+    num_neighbours = size(neighbours)[1]
+    #@show neighbours
+    hnew[i,j,k] = h[i,j,k]
+    for nb = 1:num_neighbours
+        hnew[i,j,k] += add_flux(cell, h, K, neighbours[nb])
+    end
+    return hnew
+end
+
+function kernel_no_stencil!(cell, h, hnew, K)
+    (i, j, k ) = cell
+
+    hnew[i,j,k] = h[i,j,k] +
+                    K[i,j,k]*(h[i+1,j  ,k  ]-2h[i,j,k] + h[i-1,j  ,k  ] +
+                              h[i  ,j+1,k  ]-2h[i,j,k] + h[i  ,j-1,k  ] +
+                              h[i  ,j  ,k+1]-2h[i,j,k] + h[i  ,j  ,k-1] )
+    return hnew
+end
+
+function add_flux(cell, h, K, neighb)
+    (i ,j ,k ) = cell
+    (in,jn,kn) = neighb
+    # Take the direction of the neighbour into account
+    s = Float64(sign(i-in)+sign(j-jn)+sign(k-kn))
+    flux = s * K[i,j,k] * (h[i,j,k]-h[in,jn,kn])
+end
+
+function test_full_stencil_based!(grid, h, hnew, K, stencil_type)
+    nx = grid.nx
+    ny = grid.ny
+    nz = grid.nz
+
+    for k = 1:nz
+        for j = 1:ny
+            for i = 1:nx
+                cell = (i,j,k)
+                # @inbounds
+                neighbours = Nothing
+                neighbours = get_stencil(cell, stencil_type[i,j,k])
+                hnew = kernel!(cell, h, hnew, K, neighbours)
+                #@show size(neighbours)
+            end
+        end
+    end
+
+end
+
+function test_stencil_based!(grid, h, hnew, K, stencil_type)
+    nx = grid.nx
+    ny = grid.ny
+    nz = grid.nz
+
+    for k = 2:nz-1
+        for j = 2:ny-1
+            for i = 2:nx-1
+                cell = (i,j,k)
+                # @inbounds
+                neighbours = Nothing
+                neighbours = get_stencil(cell, stencil_type[i,j,k])
+                hnew = kernel!(cell, h, hnew, K, neighbours)
+                #@show size(neighbours)
+            end
+        end
+    end
+
+end
+
+function test_no_stencil!(grid, h, hnew, K)
+    nx = grid.nx
+    ny = grid.ny
+    nz = grid.nz
+
+    for k = 2:nz-1
+        for j = 2:ny-1
+            for i = 2:nx-1
+                cell = (i,j,k)
+                # @inbounds
+                hnew = kernel_no_stencil!(cell, h, hnew, K)
+                #@show size(neighbours)
+            end
+        end
+    end
+
+end
+
 function test_stencil()
 
-    nx = 30
-    ny = 20
-    nz = 10
+    nx = 40
+    ny = 40
+    nz = 40
     dx = 10.0
     dy = 10.0
     dz = 10.0
     useCUDA = false
+
+    h0 = 10.0
+    K0 = 1.0e-4
+
+    h = fill(h0,(nx,ny,nz))
+    hnew = copy(h)
+    K = fill(K0,(nx,ny,nz))
 
     x,y,z = grid_coords(nx, ny, nz, dx, dy, dz, useCUDA)
 
@@ -347,17 +529,10 @@ function test_stencil()
 
     stencil_type = set_stencil_type(grid) #, stencil_type)
 
-    for k = 1:2
-        for j = 1:ny
-            for i = 1:nx
-                cell = (i,j,k)
-                # @inbounds
-                neighbours = get_stencil(cell, stencil_type[i,j,k])
-                #@show size(neighbours)
-            end
-        end
-    end
+    #@time test_full_stencil_based!(grid, h, hnew, K, stencil_type)
+    @time test_stencil_based!(grid, h, hnew, K, stencil_type)
+    @time test_no_stencil!(grid, h, hnew, K)
 
 end
 
-@time test_stencil()
+test_stencil()
