@@ -42,300 +42,327 @@ struct TopNorthEastBoundaryCell <:Stencil end
 
 
 # Stencil for internal cell
-@inline function get_stencil(cell, stencil_type::InternalCell)
+function get_stencil!(cell, stencil_type::InternalCell, stencil, nb)
     (i, j, k) = cell
-    stencil = Array{Tuple,1}(undef,6)
+    nb = 6
+    #stencil = Array{Tuple,1}(undef,6)
     stencil[1] = (i-1, j  , k  )
     stencil[2] = (i+1, j  , k  )
     stencil[3] = (i  , j-1, k  )
     stencil[4] = (i  , j+1, k  )
     stencil[5] = (i  , j  , k-1)
     stencil[6] = (i  , j  , k+1)
-    return stencil
+    return stencil, nb
 end
 
 # Stencil for west boundary cell
-@inline function get_stencil(cell, stencil_type::WestBoundaryCell)
+function get_stencil!(cell, stencil_type::WestBoundaryCell, stencil, nb)
     (i, j, k) = cell
-    stencil = Array{Tuple,1}(undef,5)
+    nb = 5
+    #stencil = Array{Tuple,1}(undef,5)
     stencil[1] = (i+1, j  , k  )
     stencil[2] = (i  , j-1, k  )
     stencil[3] = (i  , j+1, k  )
     stencil[4] = (i  , j  , k-1)
     stencil[5] = (i  , j  , k+1)
-    return stencil
+    return stencil, nb
 end
 
 # Stencil for east boundary cell
-@inline function get_stencil(cell, stencil_type::EastBoundaryCell)
+function get_stencil!(cell, stencil_type::EastBoundaryCell, stencil, nb)
     (i, j, k) = cell
-    stencil = Array{Tuple,1}(undef,5)
+    nb = 5
+    #stencil = Array{Tuple,1}(undef,5)
     stencil[1] = (i-1, j  , k  )
     stencil[2] = (i  , j-1, k  )
     stencil[3] = (i  , j+1, k  )
     stencil[4] = (i  , j  , k-1)
     stencil[5] = (i  , j  , k+1)
-    return stencil
+    return stencil, nb
 end
 
 # Stencil for south boundary cell
-@inline function get_stencil(cell, stencil_type::SouthBoundaryCell)
+function get_stencil!(cell, stencil_type::SouthBoundaryCell, stencil, nb)
     (i, j, k) = cell
-    stencil = Array{Tuple,1}(undef,5)
+    nb = 5
+    #stencil = Array{Tuple,1}(undef,5)
     stencil[1] = (i-1, j  , k  )
     stencil[2] = (i+1, j  , k  )
     stencil[3] = (i  , j+1, k  )
     stencil[4] = (i  , j  , k-1)
     stencil[5] = (i  , j  , k+1)
-    return stencil
+    return stencil, nb
 end
 
 # Stencil for north boundary cell
-@inline function get_stencil(cell, stencil_type::NorthBoundaryCell)
+function get_stencil!(cell, stencil_type::NorthBoundaryCell, stencil, nb)
     (i, j, k) = cell
-    stencil = Array{Tuple,1}(undef,5)
+    nb = 5
+    #stencil = Array{Tuple,1}(undef,5)
     stencil[1] = (i-1, j  , k  )
     stencil[2] = (i+1, j  , k  )
     stencil[3] = (i  , j-1, k  )
     stencil[4] = (i  , j  , k-1)
     stencil[5] = (i  , j  , k+1)
-    return stencil
+    return stencil, nb
 end
 
 # Stencil for bottom boundary cell
-@inline function get_stencil(cell, stencil_type::BottomBoundaryCell)
+function get_stencil!(cell, stencil_type::BottomBoundaryCell, stencil, nb)
     (i, j, k) = cell
-    stencil = Array{Tuple,1}(undef,5)
+    nb = 5
+    #stencil = Array{Tuple,1}(undef,5)
     stencil[1] = (i-1, j  , k  )
     stencil[2] = (i+1, j  , k  )
     stencil[3] = (i  , j-1, k  )
     stencil[4] = (i  , j+1, k  )
     stencil[5] = (i  , j  , k+1)
-    return stencil
+    return stencil, nb
 end
 
 # Stencil for top boundary cell
-@inline function get_stencil(cell, stencil_type::TopBoundaryCell)
+function get_stencil!(cell, stencil_type::TopBoundaryCell, stencil, nb)
     (i, j, k) = cell
-    stencil = Array{Tuple,1}(undef,5)
+    nb = 5
+    #stencil = Array{Tuple,1}(undef,5)
     stencil[1] = (i-1, j  , k  )
     stencil[2] = (i+1, j  , k  )
     stencil[3] = (i  , j-1, k  )
     stencil[4] = (i  , j+1, k  )
     stencil[5] = (i  , j  , k-1)
-    return stencil
+    return stencil, nb
 end
 
 # Stencil for south-west boundary cell
-@inline function get_stencil(cell, stencil_type::SouthWestBoundaryCell)
+function get_stencil!(cell, stencil_type::SouthWestBoundaryCell, stencil, nb)
     (i, j, k) = cell
-    stencil = Array{Tuple,1}(undef,4)
+    nb = 4
+    #stencil = Array{Tuple,1}(undef,4)
     stencil[1] = (i+1, j  , k  )
     stencil[2] = (i  , j+1, k  )
     stencil[3] = (i  , j  , k-1)
     stencil[4] = (i  , j  , k+1)
-    return stencil
+    return stencil, nb
 end
 
 # Stencil for south-west boundary cell
-@inline function get_stencil(cell, stencil_type::SouthEastBoundaryCell)
+function get_stencil!(cell, stencil_type::SouthEastBoundaryCell, stencil, nb)
     (i, j, k) = cell
-    stencil = Array{Tuple,1}(undef,4)
+    nb = 4
+    #stencil = Array{Tuple,1}(undef,4)
     stencil[1] = (i-1, j  , k  )
     stencil[2] = (i  , j+1, k  )
     stencil[3] = (i  , j  , k-1)
     stencil[4] = (i  , j  , k+1)
-    return stencil
+    return stencil, nb
 end
 
 # Stencil for south-west boundary cell
-@inline function get_stencil(cell, stencil_type::NorthWestBoundaryCell)
+function get_stencil!(cell, stencil_type::NorthWestBoundaryCell, stencil, nb)
     (i, j, k) = cell
-    stencil = Array{Tuple,1}(undef,4)
+    nb = 4
+    #stencil = Array{Tuple,1}(undef,4)
     stencil[1] = (i+1, j  , k  )
     stencil[2] = (i  , j-1, k  )
     stencil[3] = (i  , j  , k-1)
     stencil[4] = (i  , j  , k+1)
-    return stencil
+    return stencil, nb
 end
 
 # Stencil for south-west boundary cell
-@inline function get_stencil(cell, stencil_type::NorthEastBoundaryCell)
+function get_stencil!(cell, stencil_type::NorthEastBoundaryCell, stencil, nb)
     (i, j, k) = cell
-    stencil = Array{Tuple,1}(undef,4)
+    nb = 4
+    #stencil = Array{Tuple,1}(undef,4)
     stencil[1] = (i-1, j  , k  )
     stencil[2] = (i  , j-1, k  )
     stencil[3] = (i  , j  , k-1)
     stencil[4] = (i  , j  , k+1)
-    return stencil
+    return stencil, nb
 end
 
 # Stencil for bottom-west boundary cell
-@inline function get_stencil(cell, stencil_type::BottomWestBoundaryCell)
+function get_stencil!(cell, stencil_type::BottomWestBoundaryCell, stencil, nb)
     (i, j, k) = cell
-    stencil = Array{Tuple,1}(undef,4)
+    nb = 4
+    #stencil = Array{Tuple,1}(undef,4)
     stencil[1] = (i+1, j  , k  )
     stencil[2] = (i  , j-1, k  )
     stencil[3] = (i  , j+1, k  )
     stencil[4] = (i  , j  , k+1)
-    return stencil
+    return stencil, nb
 end
 
 # Stencil for bottom-east boundary cell
-@inline function get_stencil(cell, stencil_type::BottomEastBoundaryCell)
+function get_stencil!(cell, stencil_type::BottomEastBoundaryCell, stencil, nb)
     (i, j, k) = cell
-    stencil = Array{Tuple,1}(undef,4)
+    nb = 4
+    #stencil = Array{Tuple,1}(undef,4)
     stencil[1] = (i-1, j  , k  )
     stencil[2] = (i  , j-1, k  )
     stencil[3] = (i  , j+1, k  )
     stencil[4] = (i  , j  , k+1)
-    return stencil
+    return stencil, nb
 end
 
 # Stencil for bottom-south boundary cell
-@inline function get_stencil(cell, stencil_type::BottomSouthBoundaryCell)
+function get_stencil!(cell, stencil_type::BottomSouthBoundaryCell, stencil, nb)
     (i, j, k) = cell
-    stencil = Array{Tuple,1}(undef,4)
+    nb = 4
+    #stencil = Array{Tuple,1}(undef,4)
     stencil[1] = (i-1, j  , k  )
     stencil[2] = (i+1, j  , k  )
     stencil[3] = (i  , j+1, k  )
     stencil[4] = (i  , j  , k+1)
-    return stencil
+    return stencil, nb
 end
 
 # Stencil for bottom-north boundary cell
-@inline function get_stencil(cell, stencil_type::BottomNorthBoundaryCell)
+function get_stencil!(cell, stencil_type::BottomNorthBoundaryCell, stencil, nb)
     (i, j, k) = cell
-    stencil = Array{Tuple,1}(undef,4)
+    nb = 4
+    #stencil = Array{Tuple,1}(undef,4)
     stencil[1] = (i-1, j  , k  )
     stencil[2] = (i+1, j  , k  )
     stencil[3] = (i  , j-1, k  )
     stencil[4] = (i  , j  , k+1)
-    return stencil
+    return stencil, nb
 end
 
 # Stencil for top-west boundary cell
-@inline function get_stencil(cell, stencil_type::TopWestBoundaryCell)
+function get_stencil!(cell, stencil_type::TopWestBoundaryCell, stencil, nb)
     (i, j, k) = cell
-    stencil = Array{Tuple,1}(undef,4)
+    nb = 4
+    #stencil = Array{Tuple,1}(undef,4)
     stencil[1] = (i+1, j  , k  )
     stencil[2] = (i  , j-1, k  )
     stencil[3] = (i  , j+1, k  )
     stencil[4] = (i  , j  , k-1)
-    return stencil
+    return stencil, nb
 end
 
 # Stencil for top-east boundary cell
-@inline function get_stencil(cell, stencil_type::TopEastBoundaryCell)
+function get_stencil!(cell, stencil_type::TopEastBoundaryCell, stencil, nb)
     (i, j, k) = cell
-    stencil = Array{Tuple,1}(undef,4)
+    nb = 4
+    #stencil = Array{Tuple,1}(undef,4)
     stencil[1] = (i-1, j  , k  )
     stencil[2] = (i  , j-1, k  )
     stencil[3] = (i  , j+1, k  )
     stencil[4] = (i  , j  , k-1)
-    return stencil
+    return stencil, nb
 end
 
 # Stencil for top-south boundary cell
-@inline function get_stencil(cell, stencil_type::TopSouthBoundaryCell)
+function get_stencil!(cell, stencil_type::TopSouthBoundaryCell, stencil, nb)
     (i, j, k) = cell
-    stencil = Array{Tuple,1}(undef,4)
+    nb = 4
+    #stencil = Array{Tuple,1}(undef,4)
     stencil[1] = (i-1, j  , k  )
     stencil[2] = (i+1, j  , k  )
     stencil[3] = (i  , j+1, k  )
     stencil[4] = (i  , j  , k-1)
-    return stencil
+    return stencil, nb
 end
 
 # Stencil for top-north boundary cell
-@inline function get_stencil(cell, stencil_type::TopNorthBoundaryCell)
+function get_stencil!(cell, stencil_type::TopNorthBoundaryCell, stencil, nb)
     (i, j, k) = cell
-    stencil = Array{Tuple,1}(undef,4)
+    nb = 4
+    #stencil = Array{Tuple,1}(undef,4)
     stencil[1] = (i-1, j  , k  )
     stencil[2] = (i+1, j  , k  )
     stencil[3] = (i  , j-1, k  )
     stencil[4] = (i  , j  , k-1)
-    return stencil
+    return stencil, nb
 end
 
 # Stencil for bottom south-west boundary cell
-@inline function get_stencil(cell, stencil_type::BottomSouthWestBoundaryCell)
+function get_stencil!(cell, stencil_type::BottomSouthWestBoundaryCell, stencil, nb)
     (i, j, k) = cell
-    stencil = Array{Tuple,1}(undef,3)
+    nb = 3
+    #stencil = Array{Tuple,1}(undef,3)
     stencil[1] = (i+1, j  , k  )
     stencil[2] = (i  , j+1, k  )
     stencil[3] = (i  , j  , k+1)
-    return stencil
+    return stencil, nb
 end
 
 # Stencil for bottom south-east boundary cell
-@inline function get_stencil(cell, stencil_type::BottomSouthEastBoundaryCell)
+function get_stencil!(cell, stencil_type::BottomSouthEastBoundaryCell, stencil, nb)
     (i, j, k) = cell
-    stencil = Array{Tuple,1}(undef,3)
+    nb = 3
+    #stencil = Array{Tuple,1}(undef,3)
     stencil[1] = (i-1, j  , k  )
     stencil[2] = (i  , j+1, k  )
     stencil[3] = (i  , j  , k+1)
-    return stencil
+    return stencil, nb
 end
 
 # Stencil for bottom north-west boundary cell
-@inline function get_stencil(cell, stencil_type::BottomNorthWestBoundaryCell)
+function get_stencil!(cell, stencil_type::BottomNorthWestBoundaryCell, stencil, nb)
     (i, j, k) = cell
-    stencil = Array{Tuple,1}(undef,3)
+    nb = 3
+    #stencil = Array{Tuple,1}(undef,3)
     stencil[1] = (i+1, j  , k  )
     stencil[2] = (i  , j-1, k  )
     stencil[3] = (i  , j  , k+1)
-    return stencil
+    return stencil, nb
 end
 
 # Stencil for bottom north-east boundary cell
-@inline function get_stencil(cell, stencil_type::BottomNorthEastBoundaryCell)
+function get_stencil!(cell, stencil_type::BottomNorthEastBoundaryCell, stencil, nb)
     (i, j, k) = cell
-    stencil = Array{Tuple,1}(undef,3)
+    nb = 3
+    #stencil = Array{Tuple,1}(undef,3)
     stencil[1] = (i-1, j  , k  )
     stencil[2] = (i  , j-1, k  )
     stencil[3] = (i  , j  , k+1)
-    return stencil
+    return stencil, nb
 end
 
 # Stencil for top south-west boundary cell
-@inline function get_stencil(cell, stencil_type::TopSouthWestBoundaryCell)
+function get_stencil!(cell, stencil_type::TopSouthWestBoundaryCell, stencil, nb)
     (i, j, k) = cell
-    stencil = Array{Tuple,1}(undef,3)
+    nb = 3
+    #stencil = Array{Tuple,1}(undef,3)
     stencil[1] = (i+1, j  , k  )
     stencil[2] = (i  , j+1, k  )
     stencil[3] = (i  , j  , k-1)
-    return stencil
+    return stencil, nb
 end
 
 # Stencil for top south-east boundary cell
-@inline function get_stencil(cell, stencil_type::TopSouthEastBoundaryCell)
+function get_stencil!(cell, stencil_type::TopSouthEastBoundaryCell, stencil, nb)
     (i, j, k) = cell
-    stencil = Array{Tuple,1}(undef,3)
+    nb = 3
+    #stencil = Array{Tuple,1}(undef,3)
     stencil[1] = (i-1, j  , k  )
     stencil[2] = (i  , j+1, k  )
     stencil[3] = (i  , j  , k-1)
-    return stencil
+    return stencil, nb
 end
 
 # Stencil for top north-west boundary cell
-@inline function get_stencil(cell, stencil_type::TopNorthWestBoundaryCell)
+function get_stencil!(cell, stencil_type::TopNorthWestBoundaryCell, stencil, nb)
     (i, j, k) = cell
-    stencil = Array{Tuple,1}(undef,3)
+    nb = 3
+    #stencil = Array{Tuple,1}(undef,3)
     stencil[1] = (i+1, j  , k  )
     stencil[2] = (i  , j-1, k  )
     stencil[3] = (i  , j  , k-1)
-    return stencil
+    return stencil, nb
 end
 
 # Stencil for top north-east boundary cell
-@inline function get_stencil(cell, stencil_type::TopNorthEastBoundaryCell)
+function get_stencil!(cell, stencil_type::TopNorthEastBoundaryCell, stencil, nb)
     (i, j, k) = cell
-    stencil = Array{Tuple,1}(undef,3)
+    nb = 3
+    #stencil = Array{Tuple,1}(undef,3)
     stencil[1] = (i-1, j  , k  )
     stencil[2] = (i  , j-1, k  )
     stencil[3] = (i  , j  , k-1)
-    return stencil
+    return stencil, nb
 end
 
 
@@ -417,13 +444,12 @@ function set_stencil_type(grid) #, stencil_type)
     return stencil_type
 end
 
-function kernel!(cell, h, hnew, K, neighbours)
+@inline function kernel!(cell, h, hnew, K, stencil, nb)
     (i, j, k ) = cell
-    num_neighbours = size(neighbours)[1]
-    #@show neighbours
+    #@show nb
     hnew[i,j,k] = h[i,j,k]
-    for nb = 1:num_neighbours
-        hnew[i,j,k] += add_flux(cell, h, K, neighbours[nb])
+    for ib = 1:nb
+        hnew[i,j,k] += add_flux(cell, h, K, stencil[ib])
     end
     return hnew
 end
@@ -451,14 +477,15 @@ function test_full_stencil_based!(grid, h, hnew, K, stencil_type)
     ny = grid.ny
     nz = grid.nz
 
-    for k = 1:nz
-        for j = 1:ny
-            for i = 1:nx
+    nb      = 6
+    stencil = Array{Tuple,1}(undef,6)
+
+    @inbounds for k = 1:nz
+        @inbounds for j = 1:ny
+            @inbounds for i = 1:nx
                 cell = (i,j,k)
-                # @inbounds
-                neighbours = Nothing
-                neighbours = get_stencil(cell, stencil_type[i,j,k])
-                hnew = kernel!(cell, h, hnew, K, neighbours)
+                stencil, nb = get_stencil!(cell, stencil_type[i,j,k], stencil, nb)
+                hnew = kernel!(cell, h, hnew, K, stencil, nb)
                 #@show size(neighbours)
             end
         end
@@ -471,15 +498,15 @@ function test_stencil_based!(grid, h, hnew, K, stencil_type)
     ny = grid.ny
     nz = grid.nz
 
-    for k = 2:nz-1
-        for j = 2:ny-1
-            for i = 2:nx-1
+    nb      = 6
+    stencil = Array{Tuple,1}(undef,6)
+
+    @inbounds for k = 2:nz-1
+        @inbounds for j = 2:ny-1
+            @inbounds for i = 2:nx-1
                 cell = (i,j,k)
-                # @inbounds
-                neighbours = Nothing
-                neighbours = get_stencil(cell, stencil_type[i,j,k])
-                hnew = kernel!(cell, h, hnew, K, neighbours)
-                #@show size(neighbours)
+                stencil, nb = get_stencil!(cell, stencil_type[i,j,k], stencil, nb)
+                hnew = kernel!(cell, h, hnew, K, stencil, nb)
             end
         end
     end
@@ -491,13 +518,11 @@ function test_no_stencil!(grid, h, hnew, K)
     ny = grid.ny
     nz = grid.nz
 
-    for k = 2:nz-1
-        for j = 2:ny-1
-            for i = 2:nx-1
+    @inbounds for k = 2:nz-1
+        @inbounds for j = 2:ny-1
+            @inbounds for i = 2:nx-1
                 cell = (i,j,k)
-                # @inbounds
                 hnew = kernel_no_stencil!(cell, h, hnew, K)
-                #@show size(neighbours)
             end
         end
     end
@@ -506,9 +531,15 @@ end
 
 function test_stencil()
 
-    nx = 40
-    ny = 40
-    nz = 40
+    nx = 100
+    ny = 80
+    nz = 50
+
+    @show total = nx*ny*nz
+    @show internal = (nx-1)*(ny-1)*(nz-1)
+    @show boundary = total - internal
+    @show boundary_β = 100*(boundary/total)
+
     dx = 10.0
     dy = 10.0
     dz = 10.0
@@ -529,7 +560,7 @@ function test_stencil()
 
     stencil_type = set_stencil_type(grid) #, stencil_type)
 
-    #@time test_full_stencil_based!(grid, h, hnew, K, stencil_type)
+    @time test_full_stencil_based!(grid, h, hnew, K, stencil_type)
     @time test_stencil_based!(grid, h, hnew, K, stencil_type)
     @time test_no_stencil!(grid, h, hnew, K)
 
