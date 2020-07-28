@@ -3,10 +3,7 @@
 using CuArrays
 using Adapt
 
-include("model_input.jl")
-include("grids.jl")
-include("external_forcing.jl")
-include("model.jl")
+
 
 function init_model_state(grid, h0, u0, v0, w0, useCUDA)
     # Allocate model state
@@ -52,7 +49,7 @@ function init_parameters(n1, n2, n3, p0, useCUDA)
     p1 = fill(p0, (n1, n2, n3))
     if useCUDA
         # Convert to CUDA Array
-        p1 = adapt(CuArray,p1)
+        p1 = adapt(CuArray, p1)
     end
 
     return p1
@@ -109,7 +106,7 @@ function model_initialize()
 
     # Recharge
     recharge = Recharge(const_recharge, 0.0, recharge_factor)
-    
+
     # Input object is no longer needed
     input = nothing
 
@@ -121,7 +118,7 @@ function model_initialize()
     parameters = Parameters(K)
 
     # Time related data
-    maxsteps   = round(Int64, tend/Δt)
+    maxsteps   = round(Int64, tend / Δt)
     time       = 0.0
     time_data  = Time_data(Δt, tend, time, maxsteps)
 

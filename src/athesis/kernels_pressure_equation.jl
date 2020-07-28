@@ -1,19 +1,18 @@
 # kernels_pressure_equation.jl
 
-include("operators.jl")
 
 function averageK(K, i, j, k)
-    Kw = harmonic_mean(K[i-1,j  ,k  ],K[i  ,j  ,k  ])
-    Ke = harmonic_mean(K[i  ,j  ,k  ],K[i+1,j  ,k  ])
-    Ks = harmonic_mean(K[i  ,j-1,k  ],K[i  ,j  ,k  ])
-    Kn = harmonic_mean(K[i  ,j  ,k  ],K[i  ,j+1,k  ])
-    Kb = harmonic_mean(K[i  ,j  ,k-1],K[i  ,j  ,k  ])
-    Kt = harmonic_mean(K[i  ,j  ,k  ],K[i  ,j  ,k+1])
+    Kw = harmonic_mean(K[i - 1,j  ,k  ], K[i  ,j  ,k  ])
+    Ke = harmonic_mean(K[i  ,j  ,k  ], K[i + 1,j  ,k  ])
+    Ks = harmonic_mean(K[i  ,j - 1,k  ], K[i  ,j  ,k  ])
+    Kn = harmonic_mean(K[i  ,j  ,k  ], K[i  ,j + 1,k  ])
+    Kb = harmonic_mean(K[i  ,j  ,k - 1], K[i  ,j  ,k  ])
+    Kt = harmonic_mean(K[i  ,j  ,k  ], K[i  ,j  ,k + 1])
     return Kw, Ke, Ks, Kn, Kb, Kt
 end
 
 function harmonic_mean(v1, v2)
-    return 2.0*v1*v2/(v1+v2)
+    return 2.0 * v1 * v2 / (v1 + v2)
 end
 
 ########## Pressure kernels (CPU and GPU compatible)
@@ -26,16 +25,16 @@ end
     #     (h[i,j,k+1] + h[i,j,k-1] - 2.0*h[i,j,k])/(Δz*Δz)
     #     ) + source[i,j,k]/(Δx*Δy)
 
-    #dir = (-1, 1)
-    #dim = (1,2,3)
+    # dir = (-1, 1)
+    # dim = (1,2,3)
 
-    Kw, Ke, Ks, Kn, Kb, Kt = averageK(K,i, j, k)
+    Kw, Ke, Ks, Kn, Kb, Kt = averageK(K, i, j, k)
 
-    F = (1.0/Δx*Δx) * (Ke * (h[i+1,j  ,k  ] - h[i,j,k]) - Kw * (h[i,j,k] - h[i-1,j  ,k  ])) +
-        (1.0/Δy*Δy) * (Kn * (h[i  ,j+1,k  ] - h[i,j,k]) - Ks * (h[i,j,k] - h[i  ,j-1,k  ])) +
-        (1.0/Δz*Δz) * (Kt * (h[i  ,j  ,k+1] - h[i,j,k]) - Kb * (h[i,j,k] - h[i  ,j  ,k-1])) +
-        source[i,j,k]/(Δx*Δy*Δz)
+    F = (1.0 / Δx * Δx) * (Ke * (h[i + 1,j  ,k  ] - h[i,j,k]) - Kw * (h[i,j,k] - h[i - 1,j  ,k  ])) +
+        (1.0 / Δy * Δy) * (Kn * (h[i  ,j + 1,k  ] - h[i,j,k]) - Ks * (h[i,j,k] - h[i  ,j - 1,k  ])) +
+        (1.0 / Δz * Δz) * (Kt * (h[i  ,j  ,k + 1] - h[i,j,k]) - Kb * (h[i,j,k] - h[i  ,j  ,k - 1])) +
+        source[i,j,k] / (Δx * Δy * Δz)
 
-    #F  = -K[i,j,k]*div3dᶜ(h,i,j,k, (Δx,Δy,Δz)) + source[i,j,k]
-    hⁿ⁺¹[i,j,k] = h[i,j,k] + Δt*F
+    # F  = -K[i,j,k]*div3dᶜ(h,i,j,k, (Δx,Δy,Δz)) + source[i,j,k]
+    hⁿ⁺¹[i,j,k] = h[i,j,k] + Δt * F
 end

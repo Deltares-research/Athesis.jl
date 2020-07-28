@@ -14,13 +14,11 @@
 # externals  = source
 # source     = (i_src, j_src, k_src, n_src, externals)
 
-include("gridloop.jl")
-include("kernels.jl")
 
 
 function pressure_equation!(grid, model, state, parameters, time_data)
 
-    #println("   Solving the pressure equation ...")
+    # println("   Solving the pressure equation ...")
 
     # Unpack only source to be able to dispatch on type (Array or CuArray)
     source   = model.source.external_source
@@ -41,7 +39,7 @@ function darcy_equation!(grid, model, state, parameters, time_data)
 
     # Compute the velocities from the darcy equation using the pressure
     # For now cell-centered and collocated
-    #println("   Solving the Darcy equation ...")
+    # println("   Solving the Darcy equation ...")
 
     # Unpack only source to be able to dispatch on type (Array or CuArray)
     source = model.source.external_source

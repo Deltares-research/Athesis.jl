@@ -2,7 +2,7 @@
 
 struct Model_input
     useCUDA::Bool
-    #data_type
+    # data_type
     nx::Int64
     ny::Int64
     nz::Int64
@@ -25,10 +25,10 @@ struct Model_input
     recharge_factor::AbstractFloat
 end
 
-#
+# 
 # This function takes the model input
 # Creates the model
-#
+# 
 function model_input()
 
     println("Reading model input ...")

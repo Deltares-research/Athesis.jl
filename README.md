@@ -1,4 +1,9 @@
 # Porteau.jl
+[![Stable](https://img.shields.io/badge/docs-stable-blue.svg)](https://openearth.github.io/Porteau.jl/stable)
+[![Dev](https://img.shields.io/badge/docs-dev-blue.svg)](https://openearth.github.io/Porteau.jl/dev)
+[![Build Status](https://travis-ci.com/evetion/Porteau.jl.svg?branch=master)](https://travis-ci.com/openearth/Porteau.jl)
+
+
 *a work in progress*
 
 Experimental portable water related numerical solver in Julia.

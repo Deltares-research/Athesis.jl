@@ -6,7 +6,7 @@ end
 
 mutable struct Parameters{T}
     K::T
-    #Δt::Float64
+    # Δt::Float64
 end
 
 mutable struct Physics{T}
@@ -16,11 +16,11 @@ mutable struct Physics{T}
 end
 
 mutable struct ModelComponents
-    #advection::Bool
-    #diffusion::Bool
-    #bottom_friction::Bool
-    #wind_friction::Bool
-    #gravity::Bool
+    # advection::Bool
+    # diffusion::Bool
+    # bottom_friction::Bool
+    # wind_friction::Bool
+    # gravity::Bool
     hydraulic_conductivity::Bool
     massflux::Bool
     pressure::Bool
@@ -48,15 +48,15 @@ mutable struct Source{T}
 end
 
 mutable struct Recharge
-    #duration::AbstractFloat
+    # duration::AbstractFloat
     const_recharge::AbstractFloat
     recharge_flux::AbstractFloat
     recharge_factor::AbstractFloat
 end
 
-mutable struct Model #{T}
-    #modeltype::Modeltype
-    #state::State
+mutable struct Model # {T}
+    # modeltype::Modeltype
+    # state::State
     source::Source
     recharge::Recharge
 end
@@ -66,8 +66,8 @@ mutable struct Time_data
     tend::AbstractFloat
     time::AbstractFloat
     maxsteps::Int64
-    #Courant::Float64
-    #time_integration::String
+    # Courant::Float64
+    # time_integration::String
 end
 
 

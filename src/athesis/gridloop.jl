@@ -2,9 +2,6 @@ using CUDAdrv, CUDAnative
 using CuArrays
 using TimerOutputs
 
-include("kernels.jl")
-include("model.jl")
-include("grids.jl")
 
 # function backendname(useCUDA)
 #     return useCUDA ? "GPU" : "CPU"
@@ -39,9 +36,9 @@ function cuda_wrap_kernel!(kernel::Function,
                            K)
 
     # 3D implementation
-    ix = (blockIdx().x-1)*blockDim().x  + threadIdx().x
-    iy = (blockIdx().y-1)*blockDim().y  + threadIdx().y
-    iz = (blockIdx().z-1)*blockDim().z  + threadIdx().z
+    ix = (blockIdx().x - 1) * blockDim().x  + threadIdx().x
+    iy = (blockIdx().y - 1) * blockDim().y  + threadIdx().y
+    iz = (blockIdx().z - 1) * blockDim().z  + threadIdx().z
     if (1 < ix < nx && 1 < iy < ny && 1 < iz < nz)
         kernel(ix, iy, iz,
                source,
@@ -79,12 +76,12 @@ function gridloop!(kernel::Function,
     wⁿ⁺¹  = state.wⁿ⁺¹
     K     = parameters.K
 
-    ths = (8,8,4)
-    nbx = Int(ceil(grid.nx/ths[1]))
-    nby = Int(ceil(grid.ny/ths[2]))
-    nbz = Int(ceil(grid.nz/ths[3]))
-    bls = (nbx,nby,nbz)
-    @cuda threads=ths blocks=bls cuda_wrap_kernel!(kernel, source, h, u, v, w, hⁿ⁺¹, uⁿ⁺¹, vⁿ⁺¹, wⁿ⁺¹, Δx, Δy, Δz, nx, ny, nz, Δt, K)
+    ths = (8, 8, 4)
+    nbx = Int(ceil(grid.nx / ths[1]))
+    nby = Int(ceil(grid.ny / ths[2]))
+    nbz = Int(ceil(grid.nz / ths[3]))
+    bls = (nbx, nby, nbz)
+    @cuda threads = ths blocks = bls cuda_wrap_kernel!(kernel, source, h, u, v, w, hⁿ⁺¹, uⁿ⁺¹, vⁿ⁺¹, wⁿ⁺¹, Δx, Δy, Δz, nx, ny, nz, Δt, K)
 end
 
 
@@ -114,9 +111,9 @@ function gridloop!(kernel::Function,
     wⁿ⁺¹  = state.wⁿ⁺¹
     K     = parameters.K
 
-    for k = 2:nz-1
-        for j = 2:ny-1
-            for i = 2:nx-1
+    for k = 2:nz - 1
+        for j = 2:ny - 1
+            for i = 2:nx - 1
                 kernel(i, j, k,
                        source,
                        h, u, v, w, hⁿ⁺¹, uⁿ⁺¹, vⁿ⁺¹, wⁿ⁺¹,

@@ -1,13 +1,6 @@
 # 3D groundwater
 
-using Plots
-using CuArrays
-
-include("initialize.jl")
-include("equations.jl")
-include("external_forcing.jl")
-include("postprocessing.jl")
-include("model.jl")
+using Porteau
 
 
 # This is the present data storage:
@@ -41,18 +34,18 @@ function groundwater3d()
 
         # Add the sources
         set_sources!(time, model.source)
-        set_recharge!(time,model.recharge)
+        set_recharge!(time, model.recharge)
         pressure_equation!(grid, model, state, parameters, time_data)
         darcy_equation!(grid, model, state, parameters, time_data)
 
         # Set the new time
         time += Δt
-        #println("Time step: ", n, ".      Time: ", time, " s.")
+        # println("Time step: ", n, ".      Time: ", time, " s.")
 
-        if mod(n,1000)==0
+        if mod(n, 1000) == 0
 
-            #println("Time step: ", n, ".      Time: ", time, " s.")
-            #println("Plotting ...")
+            # println("Time step: ", n, ".      Time: ", time, " s.")
+            # println("Plotting ...")
             plot_model(grid, state)
 
         end
