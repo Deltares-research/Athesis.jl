@@ -89,7 +89,7 @@ end
 
 
 function gridloop!(kernel::Function,
-                   source::Array{AbstractFloat,3},
+                   source::Array,
                    state::State,
                    grid::Grid,
                    parameters::Parameters,

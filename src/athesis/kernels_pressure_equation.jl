@@ -20,21 +20,21 @@ end
 
 @inline function pressure_kernel!(i, j, k, source, h, u, v, w, hⁿ⁺¹, uⁿ⁺¹, vⁿ⁺¹, wⁿ⁺¹, Δx::Float64, Δy::Float64, Δz::Float64, Δt::Float64, K)
     # for now cell centered
-    # F = K[i,j,k] * (
-    #     (h[i+1,j,k] + h[i-1,j,k] - 2.0*h[i,j,k])/(Δx*Δx) +
-    #     (h[i,j+1,k] + h[i,j-1,k] - 2.0*h[i,j,k])/(Δy*Δy) +
-    #     (h[i,j,k+1] + h[i,j,k-1] - 2.0*h[i,j,k])/(Δz*Δz)
-    #     ) + source[i,j,k]/(Δx*Δy)
+    F = K[i,j,k] * (
+        (h[i+1,j,k] + h[i-1,j,k] - 2.0*h[i,j,k])/(Δx*Δx) +
+        (h[i,j+1,k] + h[i,j-1,k] - 2.0*h[i,j,k])/(Δy*Δy) +
+        (h[i,j,k+1] + h[i,j,k-1] - 2.0*h[i,j,k])/(Δz*Δz)
+        ) + source[i,j,k]/(Δx*Δy)
 
     #dir = (-1, 1)
     #dim = (1,2,3)
 
-    Kw, Ke, Ks, Kn, Kb, Kt = averageK(K,i, j, k)
-
-    F = (1.0/Δx*Δx) * (Ke * (h[i+1,j  ,k  ] - h[i,j,k]) - Kw * (h[i,j,k] - h[i-1,j  ,k  ])) +
-        (1.0/Δy*Δy) * (Kn * (h[i  ,j+1,k  ] - h[i,j,k]) - Ks * (h[i,j,k] - h[i  ,j-1,k  ])) +
-        (1.0/Δz*Δz) * (Kt * (h[i  ,j  ,k+1] - h[i,j,k]) - Kb * (h[i,j,k] - h[i  ,j  ,k-1])) +
-        source[i,j,k]/(Δx*Δy*Δz)
+    # Kw, Ke, Ks, Kn, Kb, Kt = averageK(K,i, j, k)
+    #
+    # F = (1.0/Δx*Δx) * (Ke * (h[i+1,j  ,k  ] - h[i,j,k]) - Kw * (h[i,j,k] - h[i-1,j  ,k  ])) +
+    #     (1.0/Δy*Δy) * (Kn * (h[i  ,j+1,k  ] - h[i,j,k]) - Ks * (h[i,j,k] - h[i  ,j-1,k  ])) +
+    #     (1.0/Δz*Δz) * (Kt * (h[i  ,j  ,k+1] - h[i,j,k]) - Kb * (h[i,j,k] - h[i  ,j  ,k-1])) +
+    #     source[i,j,k]/(Δx*Δy*Δz)
 
     #F  = -K[i,j,k]*div3dᶜ(h,i,j,k, (Δx,Δy,Δz)) + source[i,j,k]
     hⁿ⁺¹[i,j,k] = h[i,j,k] + Δt*F

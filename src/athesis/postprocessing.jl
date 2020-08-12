@@ -25,9 +25,9 @@ function plot_model(grid, state)
     #y = grid.y
     z = grid.z
 
-    nn = Int16(grid.ny/2)
+    nn = Int16(grid.nx/2)
 
-    p1 = heatmap(x,z,state.h[:,nn,:]', fill = true, c=cgrad([:white,:green,:blue]))
+    p1 = heatmap(x,z,state.h[nn,:,:]', fill = true, c=cgrad([:white,:green,:blue]))
     #p2 = heatmap(state.u[:,nn,:]', fill = true, c=cgrad([:white,:green,:blue]))
     #p3 = heatmap(state.v[:,nn,:]', fill = true, c=cgrad([:white,:green,:blue]))
     #p4 = heatmap(state.w[:,nn,:]', fill = true, c=cgrad([:white,:green,:blue]))

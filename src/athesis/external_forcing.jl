@@ -1,14 +1,10 @@
-# external_forcing.jl
-
-using Adapt
-
 include("model.jl")
 
 function init_externals(n1, n2, n3, useCUDA)
     externals = zeros(n1, n2, n3)
     if useCUDA
         # Convert to CUDA Array
-        externals = adapt(CuArray,externals)
+        externals = CuArray(externals)
     end
     return externals
 end

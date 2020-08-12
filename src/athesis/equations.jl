@@ -25,8 +25,8 @@ function pressure_equation!(grid, model, state, parameters, time_data)
     # Unpack only source to be able to dispatch on type (Array or CuArray)
     source   = model.source.external_source
 
-    # Add the model recharge
-    source .+= model.recharge.recharge_flux
+    # Add the model recharge to 'next-to-top' layer
+    source[:,:,grid.nz-1] .+= model.recharge.recharge_flux
 
     # Solve for the pressure/head
     gridloop!(pressure_kernel!, source, state, grid, parameters, time_data)

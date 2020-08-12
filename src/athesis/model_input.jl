@@ -39,15 +39,15 @@ function model_input()
     nz   = 10
 
     # Grid sizes (m)
-    Δx   = 0.8
-    Δy   = 0.8
-    Δz   = 1.0
+    Δx   = 10.0
+    Δy   = 10.0
+    Δz   = 10.0
 
     # Time step (s)
-    Δt   = 5.0
+    Δt   = 10.0
 
     # hydraulic_conductivity (m/s)
-    K0   = 1.0e-4
+    K0   = 1.0e-2
 
     # Initial condition
     h0   = 10.0    # (m)
@@ -56,9 +56,9 @@ function model_input()
     w0   = 0.0     # (m/s)
 
     # Source (well) data
-    i_src  = 30
-    j_src  = 10
-    k_src  = 2
+    i_src  = 1
+    j_src  = 1
+    k_src  = 1
     duration = 0.0  # (s)
     source = 0.0    # (m3/s)
 

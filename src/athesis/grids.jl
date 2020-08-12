@@ -1,7 +1,4 @@
 # grids.jl
-
-using Adapt
-
 mutable struct Grid{T}
     #grid_type::String
     nx::Int64
@@ -35,11 +32,9 @@ function grid_coords(n1, n2, n3, Δ1, Δ2, Δ3, useCUDA)
 
     if useCUDA
         # Convert to CUDA Arrays
-        println(typeof(coord1))
-        coord1 = adapt(CuArray,coord1)
-        coord2 = adapt(CuArray,coord2)
-        coord3 = adapt(CuArray,coord3)
-        println(typeof(coord1))
+        coord1 = CuArray(coord1)
+        coord2 = CuArray(coord2)
+        coord3 = CuArray(coord3)
     end
     return coord1, coord2, coord3
 end
