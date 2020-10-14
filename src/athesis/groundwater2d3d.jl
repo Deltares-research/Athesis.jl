@@ -49,7 +49,7 @@ function groundwater3d()
         time += Δt
         #println("Time step: ", n, ".      Time: ", time, " s.")
 
-        if mod(n,1000)==0
+        if mod(n,50)==0
 
             #println("Time step: ", n, ".      Time: ", time, " s.")
             #println("Plotting ...")

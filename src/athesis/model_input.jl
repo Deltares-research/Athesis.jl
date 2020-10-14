@@ -34,17 +34,17 @@ function model_input()
     println("Reading model input ...")
 
     # Model size per dimension (-)
-    nx   = 100
-    ny   = 100
+    nx   = 10
+    ny   = 10
     nz   = 10
 
     # Grid sizes (m)
-    Δx   = 10.0
-    Δy   = 10.0
+    Δx   = 100.0
+    Δy   = 100.0
     Δz   = 10.0
 
     # Time step (s)
-    Δt   = 10.0
+    Δt   = 100.0
 
     # hydraulic_conductivity (m/s)
     K0   = 1.0e-2
@@ -78,7 +78,7 @@ function model_input()
     # tend = 1Y (1D)?, dt = large
 
     # Simulation end time (s)
-    tend = 400000.0
+    tend = 10000.0
 
     # Backend selection
     println("Hit c for cuda...")

@@ -18,24 +18,25 @@ end
 
 ########## Pressure kernels (CPU and GPU compatible)
 
-@inline function pressure_kernel!(i, j, k, source, h, u, v, w, hⁿ⁺¹, uⁿ⁺¹, vⁿ⁺¹, wⁿ⁺¹, Δx::Float64, Δy::Float64, Δz::Float64, Δt::Float64, K)
+@inline function pressure_kernel!(i, j, k, source, h, u, v, w, hⁿ⁺¹, uⁿ⁺¹, vⁿ⁺¹, wⁿ⁺¹, Δx::Float64, Δy::Float64, Δz::Float64, Δt::Float64, K, SS::Float64)
     # for now cell centered
     F = K[i,j,k] * (
         (h[i+1,j,k] + h[i-1,j,k] - 2.0*h[i,j,k])/(Δx*Δx) +
         (h[i,j+1,k] + h[i,j-1,k] - 2.0*h[i,j,k])/(Δy*Δy) +
         (h[i,j,k+1] + h[i,j,k-1] - 2.0*h[i,j,k])/(Δz*Δz)
-        ) + source[i,j,k]/(Δx*Δy)
+        ) + source[i,j,k]/(Δx*Δy*Δz)
 
-    #dir = (-1, 1)
-    #dim = (1,2,3)
+    hⁿ⁺¹[i,j,k] = h[i,j,k] + Δt*F*(1.0/SS)
+end
 
-    # Kw, Ke, Ks, Kn, Kb, Kt = averageK(K,i, j, k)
-    #
-    # F = (1.0/Δx*Δx) * (Ke * (h[i+1,j  ,k  ] - h[i,j,k]) - Kw * (h[i,j,k] - h[i-1,j  ,k  ])) +
-    #     (1.0/Δy*Δy) * (Kn * (h[i  ,j+1,k  ] - h[i,j,k]) - Ks * (h[i,j,k] - h[i  ,j-1,k  ])) +
-    #     (1.0/Δz*Δz) * (Kt * (h[i  ,j  ,k+1] - h[i,j,k]) - Kb * (h[i,j,k] - h[i  ,j  ,k-1])) +
-    #     source[i,j,k]/(Δx*Δy*Δz)
+@inline function pressure_kernel_averaged!(i, j, k, source, h, u, v, w, hⁿ⁺¹, uⁿ⁺¹, vⁿ⁺¹, wⁿ⁺¹, Δx::Float64, Δy::Float64, Δz::Float64, Δt::Float64, K, SS::Float64)
 
-    #F  = -K[i,j,k]*div3dᶜ(h,i,j,k, (Δx,Δy,Δz)) + source[i,j,k]
-    hⁿ⁺¹[i,j,k] = h[i,j,k] + Δt*F
+    Kw, Ke, Ks, Kn, Kb, Kt = averageK(K,i, j, k)
+
+    F = (1.0/Δx*Δx) * (Ke * (h[i+1,j  ,k  ] - h[i,j,k]) - Kw * (h[i,j,k] - h[i-1,j  ,k  ])) +
+        (1.0/Δy*Δy) * (Kn * (h[i  ,j+1,k  ] - h[i,j,k]) - Ks * (h[i,j,k] - h[i  ,j-1,k  ])) +
+        (1.0/Δz*Δz) * (Kt * (h[i  ,j  ,k+1] - h[i,j,k]) - Kb * (h[i,j,k] - h[i  ,j  ,k-1])) +
+        source[i,j,k]/(Δx*Δy*Δz)
+
+    hⁿ⁺¹[i,j,k] = h[i,j,k] + Δt*F*(1.0/SS)
 end

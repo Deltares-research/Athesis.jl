@@ -97,6 +97,7 @@ function model_initialize()
 
     # Model parameters
     K          = init_parameters(nx, ny, nz, K0, useCUDA)
+    specific_storage = 0.0001
 
     # Sources/sinks
     source     = Source(i_src, j_src, k_src, duration, source, externals)
@@ -113,7 +114,7 @@ function model_initialize()
     model      = Model(source, recharge)
 
     # Initialize the set of parameters (for now only K)
-    parameters = Parameters(K)
+    parameters = Parameters(K, specific_storage)
 
     # Time related data
     maxsteps   = round(Int64, tend/Δt)

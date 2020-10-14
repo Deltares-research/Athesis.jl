@@ -16,11 +16,11 @@ nouter, ninner = 100, 300
 hclose, rclose, relax = 1e-9, 1e-3, 0.97
 
 # model spatial dimensions
-nlay, nrow, ncol = 1, 100, 100
+nlay, nrow, ncol = 1, 1000, 1000
 
 # cell spacing
 delr = 50.
-delc = 1.
+delc = 50.
 area = delr * delc
 
 # top of the aquifer

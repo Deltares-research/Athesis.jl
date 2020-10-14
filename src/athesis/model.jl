@@ -6,6 +6,7 @@ end
 
 mutable struct Parameters{T}
     K::T
+    specific_storage::AbstractFloat
     #Δt::Float64
 end
 
