@@ -6,6 +6,7 @@ end
 
 mutable struct Parameters{T}
     K::T
+    specific_storage::AbstractFloat
     #Δt::Float64
 end
 
@@ -68,6 +69,11 @@ mutable struct Time_data
     maxsteps::Int64
     #Courant::Float64
     #time_integration::String
+end
+
+mutable struct Solver_data{T}
+    hclose::AbstractFloat
+    Δh::T
 end
 
 

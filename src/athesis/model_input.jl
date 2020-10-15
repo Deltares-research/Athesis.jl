@@ -12,6 +12,7 @@ struct Model_input
     Δt::AbstractFloat
     tend::AbstractFloat
     K0::AbstractFloat
+    S0::AbstractFloat
     h0::AbstractFloat
     u0::AbstractFloat
     v0::AbstractFloat
@@ -39,18 +40,22 @@ function model_input()
     nz   = 10
 
     # Grid sizes (m)
-    Δx   = 10.0
-    Δy   = 10.0
+    Δx   = 100.0
+    Δy   = 100.0
     Δz   = 10.0
 
-    # Time step (s)
-    Δt   = 10.0
-
     # hydraulic_conductivity (m/s)
-    K0   = 1.0e-2
+    K0   = 50.0 / (24*3600)
+
+    # specific storage (1/m)
+    S0 = 0.0001
+
+    # Time step (s)
+    Δt = S0*(min(Δx,Δy,Δz))^2/(4.0*K0)
+    println("Δt (Courant-like) = ", Δt)
 
     # Initial condition
-    h0   = 10.0    # (m)
+    h0   = 95.0    # (m)
     u0   = 0.0     # (m/s)
     v0   = 0.0     # (m/s)
     w0   = 0.0     # (m/s)
@@ -62,13 +67,13 @@ function model_input()
     duration = 0.0  # (s)
     source = 0.0    # (m3/s)
 
-    # Rescharge data
+    # Recharge data
     # QR_nb = I_nb * M_nb * A_n
     # with QR_nb in (L^3/T, or m3/s)
     # I is the unit rescharge flux (m/s)
     # A is the cell area for cell n
     # M is a multiplier/factor
-    const_recharge = 5.0e-4    # (m3/s)
+    const_recharge = 5.0e-4 * Δx * Δy # (m3/s)
     recharge_factor = 1.0      # (-)
 
     # Test model:
@@ -78,7 +83,7 @@ function model_input()
     # tend = 1Y (1D)?, dt = large
 
     # Simulation end time (s)
-    tend = 400000.0
+    tend = 10000.0
 
     # Backend selection
     println("Hit c for cuda...")
@@ -94,6 +99,6 @@ function model_input()
 
     # Store the input in tuple "input"
     println("Grid specified: 3D grid with\n nx = ", nx, ",\n ny = ", ny, ",\n nz = ", nz, " and\n Δx = ", Δx, ",\n Δy = ", Δy, ",\n Δz = ", Δz)
-    input = Model_input(useCUDA, nx, ny, nz, Δx, Δy, Δz, Δt, tend, K0, h0, u0, v0, w0, source, i_src, j_src, k_src, duration, const_recharge, recharge_factor)
+    input = Model_input(useCUDA, nx, ny, nz, Δx, Δy, Δz, Δt, tend, K0, S0, h0, u0, v0, w0, source, i_src, j_src, k_src, duration, const_recharge, recharge_factor)
 
 end

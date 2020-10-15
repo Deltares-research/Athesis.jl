@@ -30,9 +30,6 @@ function pressure_equation!(grid, model, state, parameters, time_data)
 
     # Solve for the pressure/head
     gridloop!(pressure_kernel!, source, state, grid, parameters, time_data)
-
-    # Update the old to the new solution
-    state.h = copy(state.hⁿ⁺¹)
 end
 
 
@@ -47,8 +44,4 @@ function darcy_equation!(grid, model, state, parameters, time_data)
     source = model.source.external_source
 
     gridloop!(darcy_kernel!, source, state, grid, parameters, time_data)
-
-    # Update the old to the new solution
-    state.u = copy(state.uⁿ⁺¹)
-    state.v = copy(state.vⁿ⁺¹)
 end
