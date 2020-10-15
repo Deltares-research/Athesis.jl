@@ -2,13 +2,13 @@
 
 using Plots
 using CuArrays
+using TimerOutputs
 
 include("initialize.jl")
 include("equations.jl")
 include("external_forcing.jl")
 include("postprocessing.jl")
 include("model.jl")
-
 
 # This is the present data storage:
 # grid       = (nx, ny, nz, Δx, Δy, Δz, x, y, z)
@@ -21,43 +21,101 @@ include("model.jl")
 
 function groundwater3d()
 
+    to = TimerOutput()
+
+    @timeit to "run time" begin
+
     # Initialize the model
     println("Running 3D groundwater model:")
-    grid, model, state, parameters, time_data = model_initialize()
 
-    # Unpack time parameters required for the time loop
-    Δt       = time_data.Δt
-    tend     = time_data.tend
-    maxsteps = time_data.maxsteps
-    time     = time_data.time
+    @timeit to "initialization" begin
+        grid, model, state, parameters, time_data, solver_data = model_initialize()
 
-    # Now start the time loop
-    println("Starting time loop ...")
+        # Unpack time parameters required for the time loop
+        Δt       = time_data.Δt
+        tend     = time_data.tend
+        maxsteps = time_data.maxsteps
+        time     = time_data.time
 
-    # Initialize the present time
-    time = 0.0
+        # Now start the time loop
+        println("Starting time loop ...")
+
+        # Initialize the present time
+        time = 0.0
+    end
+
+    @timeit to "solve" begin
 
     for n = 1:maxsteps
 
         # Add the sources
-        set_sources!(time, model.source)
-        set_recharge!(time,model.recharge)
-        pressure_equation!(grid, model, state, parameters, time_data)
-        darcy_equation!(grid, model, state, parameters, time_data)
+        @timeit to "set rhs" begin
+            set_sources!(time, model.source)
+            set_recharge!(time,model.recharge)
+        end
 
-        # Set the new time
-        time += Δt
-        #println("Time step: ", n, ".      Time: ", time, " s.")
+        @timeit to "solve pressure" begin
+            pressure_equation!(grid, model, state, parameters, time_data)
+        end
+        @timeit to "solve darcy" begin
+            darcy_equation!(grid, model, state, parameters, time_data)
+        end
 
-        if mod(n,50)==0
+        # check convergence
+        @timeit to "convergence check" begin
+            has_converged, Δh_max = check_convergence!(state, solver_data)
+            if (has_converged)
+                println()
+                println("-- solver converged --")
+                println("Δh_max = ", Δh_max)
+                println("nr. of iters = ", n)
+                println()
+                break
+            end
+        end
 
-            #println("Time step: ", n, ".      Time: ", time, " s.")
-            #println("Plotting ...")
-            plot_model(grid, state)
+        println("iter = ", n, ", Δh_max = ", Δh_max)
 
+        # Update the old to the new solution
+        @timeit to "update state" begin
+            state.h = copy(state.hⁿ⁺¹)
+            state.u = copy(state.uⁿ⁺¹)
+            state.v = copy(state.vⁿ⁺¹)
+            time += Δt
         end
 
     end
+
+end
+
+@timeit to "plot result" begin
+    plot_model(grid, state)
+end
+
+end
+
+print_timer(to)
+
+end
+
+function check_convergence!(state::State, solver_data::Solver_data)
+    solver_data.Δh .= abs.(state.hⁿ⁺¹ - state.h)
+    Δh_max, max_index = find_maximum(solver_data.Δh)
+    if Δh_max > solver_data.hclose
+        return false, Δh_max
+    end
+
+    # convergence
+    return true, Δh_max
+end
+
+function find_maximum(h)
+    return findmax(h)
+end
+
+function find_maximum(h::CuArray)
+    m = reduce(max,h)
+    return m,-1
 end
 
 ################################

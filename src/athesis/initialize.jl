@@ -73,6 +73,7 @@ function model_initialize()
     Δt        = input.Δt
     tend      = input.tend
     K0        = input.K0
+    S0        = input.S0
     h0        = input.h0
     u0        = input.u0
     v0        = input.v0
@@ -97,7 +98,7 @@ function model_initialize()
 
     # Model parameters
     K          = init_parameters(nx, ny, nz, K0, useCUDA)
-    specific_storage = 0.0001
+    specific_storage = S0
 
     # Sources/sinks
     source     = Source(i_src, j_src, k_src, duration, source, externals)
@@ -121,5 +122,11 @@ function model_initialize()
     time       = 0.0
     time_data  = Time_data(Δt, tend, time, maxsteps)
 
-    return grid, model, state, parameters, time_data
+    # Solver data
+    hclose = 0.001
+    Δh = copy(state.h)
+    fill!(Δh, 0.0)
+    solver_data = Solver_data(hclose, Δh)
+
+    return grid, model, state, parameters, time_data, solver_data
 end

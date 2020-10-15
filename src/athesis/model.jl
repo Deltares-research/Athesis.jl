@@ -71,6 +71,11 @@ mutable struct Time_data
     #time_integration::String
 end
 
+mutable struct Solver_data{T}
+    hclose::AbstractFloat
+    Δh::T
+end
+
 
 mutable struct Backend
     GPU::Bool
