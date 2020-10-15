@@ -1,6 +1,7 @@
 # initialize.jl
 
 using CuArrays
+using OffsetArrays
 
 include("model_input.jl")
 include("grids.jl")
@@ -15,10 +16,12 @@ function init_model_state(grid, h0, u0, v0, w0, useCUDA)
     nx = grid.nx
     ny = grid.ny
     nz = grid.nz
-    h = fill(h0, (nx, ny, nz))
-    u = fill(u0, (nx, ny, nz))
-    v = fill(v0, (nx, ny, nz))
-    w = fill(w0, (nx, ny, nz))
+
+    # Generate initial arrays with start index 1
+    h = fill(h0, (nx+2, ny+2, nz+2))
+    u = fill(u0, (nx+2, ny+2, nz+2))
+    v = fill(v0, (nx+2, ny+2, nz+2))
+    w = fill(w0, (nx+2, ny+2, nz+2))
 
     if useCUDA
         # Convert to CUDA Arrays
@@ -27,6 +30,12 @@ function init_model_state(grid, h0, u0, v0, w0, useCUDA)
         v = CuArray(v)
         w = CuArray(w)
     end
+
+    # Shift indices to let the arrays run from index 0
+    h = OffsetArray(h, (0:nx+1, 0:ny+1, 0:nz+1))
+    u = OffsetArray(u, (0:nx+1, 0:ny+1, 0:nz+1))
+    v = OffsetArray(v, (0:nx+1, 0:ny+1, 0:nz+1))
+    w = OffsetArray(w, (0:nx+1, 0:ny+1, 0:nz+1))
 
     # Copy the state to the updated state
     hⁿ⁺¹ = copy(h)
@@ -39,20 +48,27 @@ function init_model_state(grid, h0, u0, v0, w0, useCUDA)
 end
 
 
-function init_parameters(n1, n2, n3, p0, useCUDA)
+function init_parameters(nx, ny, nz, p0, useCUDA)
     # Allocate parameters for a 3D model
     # with 1 parameter
     # for now cell-centered,
     # i.e. in all direction the same number of degrees of freedom
-    p1 = fill(p0, (n1, n2, n3))
+
+    # Generate initial array with start index 1
+    p1 = fill(p0, (nx+2, ny+2, nz+2))
+
     if useCUDA
         # Convert to CUDA Array
         p1 = CuArray(p1)
     end
 
+    # Shift index to let array start at 0
+    p1 = OffsetArray(p1, (0:nx+1, 0:ny+1, 0:nz+1))
+
+
+
     return p1
 end
-
 
 
 function model_initialize()
@@ -85,6 +101,7 @@ function model_initialize()
     duration  = input.duration
     const_recharge = input.const_recharge
     recharge_factor = input.recharge_factor
+    boundary_pressure = input.boundary_pressure
 
     # The grid
     x, y, z    = grid_coords(nx, ny, nz, Δx, Δy, Δz, useCUDA)
@@ -107,15 +124,18 @@ function model_initialize()
     # Recharge
     recharge = Recharge(const_recharge, 0.0, recharge_factor)
 
-    # Input object is no longer needed
-    input = nothing
+    # Store the boundary conditions
+    boundary_conditions = BoundaryConditions(boundary_pressure[1], boundary_pressure[2])
 
     # Group some parameters in the model.
-    # For now only sources
-    model      = Model(source, recharge)
+    # For now sources and boundary conditions
+    model      = Model(source, recharge, boundary_conditions)
 
     # Initialize the set of parameters (for now only K)
     parameters = Parameters(K, specific_storage)
+
+    # Input object is no longer needed
+    input = nothing
 
     # Time related data
     maxsteps   = round(Int64, tend/Δt)
@@ -123,8 +143,8 @@ function model_initialize()
     time_data  = Time_data(Δt, tend, time, maxsteps)
 
     # Solver data
-    hclose = 0.001
-    Δh = copy(state.h)
+    hclose = 0.0001
+    Δh = copy(K)
     fill!(Δh, 0.0)
     solver_data = Solver_data(hclose, Δh)
 

@@ -39,7 +39,7 @@ function cuda_wrap_kernel!(kernel::Function,
     ix = (blockIdx().x-1)*blockDim().x  + threadIdx().x
     iy = (blockIdx().y-1)*blockDim().y  + threadIdx().y
     iz = (blockIdx().z-1)*blockDim().z  + threadIdx().z
-    if (1 < ix < nx && 1 < iy < ny && 1 < iz < nz)
+    if (0 < ix < nx+1 && 0 < iy < ny+1 && 0 < iz < nz+1)
         kernel(ix, iy, iz,
                source,
                h, u, v, w, hⁿ⁺¹, uⁿ⁺¹, vⁿ⁺¹, wⁿ⁺¹,
@@ -118,9 +118,9 @@ function gridloop!(kernel::Function,
     K     = parameters.K
     SS    = parameters.specific_storage
 
-    for k = 2:nz-1
-        for j = 2:ny-1
-            for i = 2:nx-1
+    for k = 1:nz
+        for j = 1:ny
+            for i = 1:nx
                 kernel(i, j, k,
                        source,
                        h, u, v, w, hⁿ⁺¹, uⁿ⁺¹, vⁿ⁺¹, wⁿ⁺¹,
