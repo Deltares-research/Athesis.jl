@@ -1,7 +1,7 @@
 include("model.jl")
 
-function init_externals(n1, n2, n3, useCUDA)
-    externals = zeros(n1, n2, n3)
+function init_externals(nx, ny, nz, useCUDA)
+    externals = zeros(nx, ny, nz)
     if useCUDA
         # Convert to CUDA Array
         externals = CuArray(externals)

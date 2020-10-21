@@ -1,6 +1,6 @@
 # model_input.jl
 
-struct Model_input
+struct Model_input{T}
     useCUDA::Bool
     #data_type
     nx::Int64
@@ -24,7 +24,9 @@ struct Model_input
     duration::AbstractFloat
     const_recharge::AbstractFloat
     recharge_factor::AbstractFloat
+    boundary_pressure::T
 end
+
 
 #
 # This function takes the model input
@@ -59,6 +61,11 @@ function model_input()
     u0   = 0.0     # (m/s)
     v0   = 0.0     # (m/s)
     w0   = 0.0     # (m/s)
+
+    # Boundary conditions
+    h_bc_west = 95.0
+    h_bc_east = 95.0
+    boundary_pressure = [h_bc_west, h_bc_east]
 
     # Source (well) data
     i_src  = 1
@@ -99,6 +106,6 @@ function model_input()
 
     # Store the input in tuple "input"
     println("Grid specified: 3D grid with\n nx = ", nx, ",\n ny = ", ny, ",\n nz = ", nz, " and\n Δx = ", Δx, ",\n Δy = ", Δy, ",\n Δz = ", Δz)
-    input = Model_input(useCUDA, nx, ny, nz, Δx, Δy, Δz, Δt, tend, K0, S0, h0, u0, v0, w0, source, i_src, j_src, k_src, duration, const_recharge, recharge_factor)
+    input = Model_input(useCUDA, nx, ny, nz, Δx, Δy, Δz, Δt, tend, K0, S0, h0, u0, v0, w0, source, i_src, j_src, k_src, duration, const_recharge, recharge_factor, boundary_pressure)
 
 end

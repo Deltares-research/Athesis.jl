@@ -9,6 +9,7 @@ include("equations.jl")
 include("external_forcing.jl")
 include("postprocessing.jl")
 include("model.jl")
+include("boundary_conditions.jl")
 
 # This is the present data storage:
 # grid       = (nx, ny, nz, Δx, Δy, Δz, x, y, z)
@@ -54,11 +55,16 @@ function groundwater3d()
             set_recharge!(time,model.recharge)
         end
 
+        @timeit to "set_boundaries" begin
+            bc = model.boundary_conditions
+            set_boundaries!(grid, state, bc)
+        end
+
         @timeit to "solve pressure" begin
             pressure_equation!(grid, model, state, parameters, time_data)
         end
         @timeit to "solve darcy" begin
-            darcy_equation!(grid, model, state, parameters, time_data)
+            #darcy_equation!(grid, model, state, parameters, time_data)
         end
 
         # check convergence

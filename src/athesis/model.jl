@@ -10,6 +10,11 @@ mutable struct Parameters{T}
     #Δt::Float64
 end
 
+mutable struct BoundaryConditions
+    west_pressure::AbstractFloat
+    east_pressure::AbstractFloat
+end
+
 mutable struct Physics{T}
     g::AbstractFloat
     nuₕ::T
@@ -60,6 +65,7 @@ mutable struct Model #{T}
     #state::State
     source::Source
     recharge::Recharge
+    boundary_conditions::BoundaryConditions
 end
 
 mutable struct Time_data
