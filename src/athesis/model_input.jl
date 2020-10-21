@@ -37,17 +37,17 @@ function model_input()
     println("Reading model input ...")
 
     # Model size per dimension (-)
-    nx   = 100
-    ny   = 100
-    nz   = 10
+    nx   = 11
+    ny   = 11
+    nz   = 1
 
     # Grid sizes (m)
-    Δx   = 100.0
-    Δy   = 100.0
+    Δx   = 80.0/(nx+1)
+    Δy   = 80.0/(ny+1)
     Δz   = 10.0
 
     # hydraulic_conductivity (m/s)
-    K0   = 50.0 / (24*3600)
+    K0   = 10.0
 
     # specific storage (1/m)
     S0 = 0.0001
@@ -57,14 +57,14 @@ function model_input()
     println("Δt (Courant-like) = ", Δt)
 
     # Initial condition
-    h0   = 95.0    # (m)
+    h0   = 1.1    # (m)
     u0   = 0.0     # (m/s)
     v0   = 0.0     # (m/s)
     w0   = 0.0     # (m/s)
 
     # Boundary conditions
-    h_bc_west = 95.0
-    h_bc_east = 95.0
+    h_bc_west = 1.0
+    h_bc_east = 1.0
     boundary_pressure = [h_bc_west, h_bc_east]
 
     # Source (well) data
@@ -80,7 +80,7 @@ function model_input()
     # I is the unit rescharge flux (m/s)
     # A is the cell area for cell n
     # M is a multiplier/factor
-    const_recharge = 5.0e-4 * Δx * Δy # (m3/s)
+    const_recharge = 5.0e-4 * Δx * Δy# / (24*3600.) # (m3/s)
     recharge_factor = 1.0      # (-)
 
     # Test model:
@@ -90,7 +90,7 @@ function model_input()
     # tend = 1Y (1D)?, dt = large
 
     # Simulation end time (s)
-    tend = 10000.0
+    tend = 100000.0
 
     # Backend selection
     println("Hit c for cuda...")

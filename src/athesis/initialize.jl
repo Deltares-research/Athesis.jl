@@ -143,7 +143,7 @@ function model_initialize()
     time_data  = Time_data(Δt, tend, time, maxsteps)
 
     # Solver data
-    hclose = 0.0001
+    hclose = 1e-15
     Δh = copy(K)
     fill!(Δh, 0.0)
     solver_data = Solver_data(hclose, Δh)

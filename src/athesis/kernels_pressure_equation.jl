@@ -24,7 +24,7 @@ end
         (h[i+1,j,k] + h[i-1,j,k] - 2.0*h[i,j,k])/(Δx*Δx) +
         (h[i,j+1,k] + h[i,j-1,k] - 2.0*h[i,j,k])/(Δy*Δy) +
         (h[i,j,k+1] + h[i,j,k-1] - 2.0*h[i,j,k])/(Δz*Δz)
-        ) + source[i,j,k]/(Δx*Δy*Δz)
+        ) + source[i,j,k]/(Δx*Δy)
 
     hⁿ⁺¹[i,j,k] = h[i,j,k] + Δt*F*(1.0/SS)
 end
