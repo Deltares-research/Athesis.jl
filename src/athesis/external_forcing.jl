@@ -1,5 +1,3 @@
-include("model.jl")
-
 function init_externals(nx, ny, nz, useCUDA)
     externals = zeros(nx, ny, nz)
     if useCUDA

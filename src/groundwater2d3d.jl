@@ -4,12 +4,7 @@ using Plots
 using CuArrays
 using TimerOutputs
 
-include("initialize.jl")
-include("equations.jl")
-include("external_forcing.jl")
-include("postprocessing.jl")
-include("model.jl")
-include("boundary_conditions.jl")
+using Athesis
 
 # This is the present data storage:
 # grid       = (nx, ny, nz, Δx, Δy, Δz, x, y, z)
@@ -20,7 +15,17 @@ include("boundary_conditions.jl")
 # source     = (i_src, j_src, k_src, n_src, externals)
 
 
-function groundwater3d()
+function groundwater3d(isBenchmark = false, useGPU = false)
+
+    # Backend selection
+    useCUDA = false
+    if isBenchmark
+        useCUDA = useGPU
+    else
+        println("Hit c for cuda...")
+        c = readline()
+        useCUDA = (c == "c")
+    end
 
     to = TimerOutput()
 
@@ -30,7 +35,7 @@ function groundwater3d()
     println("Running 3D groundwater model:")
 
     @timeit to "initialization" begin
-        grid, model, state, parameters, time_data, solver_data = model_initialize()
+        grid, model, state, parameters, time_data, solver_data = model_initialize(useCUDA)
 
         # Unpack time parameters required for the time loop
         Δt       = time_data.Δt
@@ -101,10 +106,15 @@ function groundwater3d()
 
 end
 
-@timeit to "plot result" begin
-    plot_model(grid, state)
-    p = plot(bulge)
-    display(p)
+if isBenchmark
+    # copy result to CPU
+    print(state.h)
+else
+    @timeit to "plot result" begin
+        plot_model(grid, state)
+        p = plot(bulge)
+        display(p)
+    end
 end
 
 end
@@ -132,9 +142,3 @@ function find_maximum(h::CuArray)
     m = reduce(max,h)
     return m,-1
 end
-
-################################
-# Execute the main function
-
-@time groundwater3d()
-################################

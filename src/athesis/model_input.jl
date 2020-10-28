@@ -1,8 +1,6 @@
 # model_input.jl
 
 struct Model_input{T}
-    useCUDA::Bool
-    #data_type
     nx::Int64
     ny::Int64
     nz::Int64
@@ -92,11 +90,6 @@ function model_input()
     # Simulation end time (s)
     tend = 100000.0
 
-    # Backend selection
-    println("Hit c for cuda...")
-    c = readline()
-    useCUDA = (c == "c")
-
     # Set corresponding data type
     # if useCUDA
     #     data_type = CuArray
@@ -106,6 +99,6 @@ function model_input()
 
     # Store the input in tuple "input"
     println("Grid specified: 3D grid with\n nx = ", nx, ",\n ny = ", ny, ",\n nz = ", nz, " and\n Δx = ", Δx, ",\n Δy = ", Δy, ",\n Δz = ", Δz)
-    input = Model_input(useCUDA, nx, ny, nz, Δx, Δy, Δz, Δt, tend, K0, S0, h0, u0, v0, w0, source, i_src, j_src, k_src, duration, const_recharge, recharge_factor, boundary_pressure)
+    input = Model_input(nx, ny, nz, Δx, Δy, Δz, Δt, tend, K0, S0, h0, u0, v0, w0, source, i_src, j_src, k_src, duration, const_recharge, recharge_factor, boundary_pressure)
 
 end

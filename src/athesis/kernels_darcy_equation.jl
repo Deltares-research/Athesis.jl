@@ -1,7 +1,5 @@
 # kernels_darcy_equation.jl
 
-include("operators.jl")
-
 ############## Darcy kernel (CPU and GPU compatible)
 
 @inline function darcy_kernel!(i, j, k, source, h, u, v, w, hⁿ⁺¹, uⁿ⁺¹, vⁿ⁺¹, wⁿ⁺¹, Δx::Float64, Δy::Float64, Δz::Float64, Δt::Float64, K, SS)
