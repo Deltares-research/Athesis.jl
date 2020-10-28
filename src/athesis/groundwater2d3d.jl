@@ -30,7 +30,7 @@ function groundwater3d()
     println("Running 3D groundwater model:")
 
     @timeit to "initialization" begin
-        grid, model, state, parameters, time_data, solver_data = model_initialize()
+        grid, model, state, parameters, time_data, solver_data, boundary_conditions = model_initialize()
 
         # Unpack time parameters required for the time loop
         Δt       = time_data.Δt
@@ -58,8 +58,8 @@ function groundwater3d()
         end
 
         @timeit to "set_boundaries" begin
-            bc = model.boundary_conditions
-            set_boundaries!(grid, state, bc)
+            #bc = model.boundary_conditions
+            set_boundaries!(grid, state, boundary_conditions)
         end
 
         @timeit to "solve pressure" begin
@@ -82,12 +82,18 @@ function groundwater3d()
             end
         end
 
-        append!(bulge, state.hⁿ⁺¹[Int(ceil(grid.nx/2)),Int(ceil(grid.ny/2)),grid.nz])
+        @timeit to "record time history" begin
+            i_his = Int(ceil(grid.nx/2))
+            j_his = Int(ceil(grid.ny/2))
+            append!(bulge, state.hⁿ⁺¹[i_his,j_his,grid.nz+1])
+        end
 
         #if mod(n,100) == 0
         #    plot_model(grid, state)
         #end
-        println("iter = ", n, ", Δh_max = ", Δh_max, " at ", max_index)
+        @timeit to "iteration output" begin
+            println("iter = ", n, ", Δh_max = ", Δh_max, " at ", max_index)
+        end
 
         # Update the old to the new solution
         @timeit to "update state" begin

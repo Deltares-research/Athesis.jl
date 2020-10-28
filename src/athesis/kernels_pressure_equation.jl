@@ -36,7 +36,7 @@ end
     F = (1.0/Δx*Δx) * (Ke * (h[i+1,j  ,k  ] - h[i,j,k]) - Kw * (h[i,j,k] - h[i-1,j  ,k  ])) +
         (1.0/Δy*Δy) * (Kn * (h[i  ,j+1,k  ] - h[i,j,k]) - Ks * (h[i,j,k] - h[i  ,j-1,k  ])) +
         (1.0/Δz*Δz) * (Kt * (h[i  ,j  ,k+1] - h[i,j,k]) - Kb * (h[i,j,k] - h[i  ,j  ,k-1])) +
-        source[i,j,k]/(Δx*Δy*Δz)
+        source[i,j,k]/(Δx*Δy)
 
     hⁿ⁺¹[i,j,k] = h[i,j,k] + Δt*F*(1.0/SS)
 end

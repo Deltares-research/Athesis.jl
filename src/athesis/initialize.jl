@@ -1,7 +1,6 @@
 # initialize.jl
 
 using CuArrays
-using OffsetArrays
 
 include("model_input.jl")
 include("grids.jl")
@@ -31,12 +30,6 @@ function init_model_state(grid, h0, u0, v0, w0, useCUDA)
         w = CuArray(w)
     end
 
-    # Shift indices to let the arrays run from index 0
-    h = OffsetArray(h, (0:nx+1, 0:ny+1, 0:nz+1))
-    u = OffsetArray(u, (0:nx+1, 0:ny+1, 0:nz+1))
-    v = OffsetArray(v, (0:nx+1, 0:ny+1, 0:nz+1))
-    w = OffsetArray(w, (0:nx+1, 0:ny+1, 0:nz+1))
-
     # Copy the state to the updated state
     hⁿ⁺¹ = copy(h)
     uⁿ⁺¹ = copy(u)
@@ -61,11 +54,6 @@ function init_parameters(nx, ny, nz, p0, useCUDA)
         # Convert to CUDA Array
         p1 = CuArray(p1)
     end
-
-    # Shift index to let array start at 0
-    p1 = OffsetArray(p1, (0:nx+1, 0:ny+1, 0:nz+1))
-
-
 
     return p1
 end
@@ -125,11 +113,14 @@ function model_initialize()
     recharge = Recharge(const_recharge, 0.0, recharge_factor)
 
     # Store the boundary conditions
-    boundary_conditions = BoundaryConditions(boundary_pressure[1], boundary_pressure[2])
+    if (useCUDA)
+        boundary_pressure = CuArray(boundary_pressure)
+    end
+    boundary_conditions = BoundaryConditions(boundary_pressure)
 
     # Group some parameters in the model.
-    # For now sources and boundary conditions
-    model      = Model(source, recharge, boundary_conditions)
+    # For now sources
+    model      = Model(source, recharge)
 
     # Initialize the set of parameters (for now only K)
     parameters = Parameters(K, specific_storage)
@@ -143,10 +134,10 @@ function model_initialize()
     time_data  = Time_data(Δt, tend, time, maxsteps)
 
     # Solver data
-    hclose = 1e-15
+    hclose = 1e-5
     Δh = copy(K)
     fill!(Δh, 0.0)
     solver_data = Solver_data(hclose, Δh)
 
-    return grid, model, state, parameters, time_data, solver_data
+    return grid, model, state, parameters, time_data, solver_data, boundary_conditions
 end

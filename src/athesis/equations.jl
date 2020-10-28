@@ -21,12 +21,15 @@ include("kernels.jl")
 function pressure_equation!(grid, model, state, parameters, time_data)
 
     #println("   Solving the pressure equation ...")
+    nx = grid.nx
+    ny = grid.ny
+    nz = grid.nz
 
     # Unpack only source to be able to dispatch on type (Array or CuArray)
     source   = model.source.external_source
 
     # Add the model recharge to top layer
-    source[:,:,grid.nz] .+= model.recharge.recharge_flux
+    source[2:nx+1,2:ny+1,nz+1] .+= model.recharge.recharge_flux
 
     # Solve for the pressure/head
     gridloop!(pressure_kernel!, source, state, grid, parameters, time_data)

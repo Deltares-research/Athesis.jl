@@ -1,7 +1,7 @@
 include("model.jl")
 
 function init_externals(nx, ny, nz, useCUDA)
-    externals = zeros(nx, ny, nz)
+    externals = zeros(nx+2, ny+2, nz+2)
     if useCUDA
         # Convert to CUDA Array
         externals = CuArray(externals)
@@ -12,9 +12,9 @@ end
 
 function set_sources!(time, source)
     # 3D implementation
-    i_src = source.i_src
-    j_src = source.j_src
-    k_src = source.k_src
+    i_src = source.i_src+1
+    j_src = source.j_src+1
+    k_src = source.k_src+1
     duration = source.duration
     source.external_source .= 0.0
     if time < duration

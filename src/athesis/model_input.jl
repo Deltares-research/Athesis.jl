@@ -37,9 +37,9 @@ function model_input()
     println("Reading model input ...")
 
     # Model size per dimension (-)
-    nx   = 11
-    ny   = 11
-    nz   = 1
+    nx   = 51
+    ny   = 51
+    nz   = 6
 
     # Grid sizes (m)
     Δx   = 80.0/(nx+1)
@@ -57,7 +57,7 @@ function model_input()
     println("Δt (Courant-like) = ", Δt)
 
     # Initial condition
-    h0   = 1.1    # (m)
+    h0   = 1.0    # (m)
     u0   = 0.0     # (m/s)
     v0   = 0.0     # (m/s)
     w0   = 0.0     # (m/s)
