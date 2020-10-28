@@ -125,7 +125,10 @@ function model_initialize()
     recharge = Recharge(const_recharge, 0.0, recharge_factor)
 
     # Store the boundary conditions
-    boundary_conditions = BoundaryConditions(boundary_pressure[1], boundary_pressure[2])
+    if (useCUDA)
+        boundary_pressure = CuArray(boundary_pressure)
+    end
+    boundary_conditions = BoundaryConditions(boundary_pressure)
 
     # Group some parameters in the model.
     # For now sources and boundary conditions
@@ -143,7 +146,7 @@ function model_initialize()
     time_data  = Time_data(Δt, tend, time, maxsteps)
 
     # Solver data
-    hclose = 1e-15
+    hclose = 1e-10
     Δh = copy(K)
     fill!(Δh, 0.0)
     solver_data = Solver_data(hclose, Δh)

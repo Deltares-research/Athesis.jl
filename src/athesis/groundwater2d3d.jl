@@ -66,7 +66,7 @@ function groundwater3d()
             pressure_equation!(grid, model, state, parameters, time_data)
         end
         @timeit to "solve darcy" begin
-            darcy_equation!(grid, model, state, parameters, time_data)
+            #darcy_equation!(grid, model, state, parameters, time_data)
         end
 
         # check convergence
@@ -82,18 +82,22 @@ function groundwater3d()
             end
         end
 
-        append!(bulge, state.hⁿ⁺¹[Int(ceil(grid.nx/2)),Int(ceil(grid.ny/2)),grid.nz])
+        @timeit to "append time history" begin
+            append!(bulge, state.hⁿ⁺¹[Int(ceil(grid.nx/2)),Int(ceil(grid.ny/2)),grid.nz])
+        end
 
         #if mod(n,100) == 0
         #    plot_model(grid, state)
         #end
-        println("iter = ", n, ", Δh_max = ", Δh_max, " at ", max_index)
+        @timeit to "print iterations" begin
+            println("iter = ", n, ", Δh_max = ", Δh_max, " at ", max_index)
+        end
 
         # Update the old to the new solution
         @timeit to "update state" begin
             state.h = copy(state.hⁿ⁺¹)
-            state.u = copy(state.uⁿ⁺¹)
-            state.v = copy(state.vⁿ⁺¹)
+            #state.u = copy(state.uⁿ⁺¹)
+            #state.v = copy(state.vⁿ⁺¹)
             time += Δt
         end
 
