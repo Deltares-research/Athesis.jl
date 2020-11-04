@@ -14,9 +14,6 @@
 # externals  = source
 # source     = (i_src, j_src, k_src, n_src, externals)
 
-include("gridloop.jl")
-include("kernels.jl")
-
 
 function pressure_equation!(grid, model, state, parameters, time_data)
 

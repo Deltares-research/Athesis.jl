@@ -2,9 +2,6 @@
 
 using Plots
 
-include("grids.jl")
-include("model.jl")
-
 # function prepare_plots(state)
 #     plotvars = Dict("h"=>state.h, "u"=>state.u, "v"=>state.v, "w"=>state.w)
 # end
