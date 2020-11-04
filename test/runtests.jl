@@ -10,7 +10,13 @@ include("../src/groundwater2d3d.jl")
     end
 
     @testset "Performance tests" begin
-        groundwater3d(true,false)
+        #groundwater3d(true,false)
+
+        opbolling = 80.0*80.0*5.0e-4/(8.0*10.0)
+
+        #println()
+        #println(opbolling)
+        #println()
         @test true
     end
 end
