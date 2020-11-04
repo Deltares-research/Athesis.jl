@@ -55,7 +55,7 @@ function model_input()
     println("Δt (Courant-like) = ", Δt)
 
     # Initial condition
-    h0   = 1.1    # (m)
+    h0   = 0.0     # (m)
     u0   = 0.0     # (m/s)
     v0   = 0.0     # (m/s)
     w0   = 0.0     # (m/s)

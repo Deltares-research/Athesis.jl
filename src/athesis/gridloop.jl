@@ -1,5 +1,4 @@
-using CUDAdrv, CUDAnative
-using CuArrays
+using CUDA
 
 # This is the present data storage:
 # grid       = (nx, ny, nz, Δx, Δy, Δz, x, y, z)

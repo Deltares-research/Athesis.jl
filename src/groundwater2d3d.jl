@@ -1,7 +1,7 @@
 # 3D groundwater
-
+using Printf
 using Plots
-using CuArrays
+using CUDA
 using TimerOutputs
 
 using Athesis
@@ -83,6 +83,9 @@ function groundwater3d(isBenchmark = false, useGPU = false)
                 println("Δh_max = ", Δh_max, " at ", max_index)
                 println("nr. of iters = ", n)
                 println()
+
+                # todo: update h_n+1 here
+                # ...
                 break
             end
         end
@@ -107,8 +110,14 @@ function groundwater3d(isBenchmark = false, useGPU = false)
 end
 
 if isBenchmark
-    # copy result to CPU
-    print(state.h)
+    # todo: how to get the physical array from the full array??
+    h_max = find_maximum(state.hⁿ⁺¹)
+    println(h_max)
+
+    rm("result.txt", force=true)
+    open("result.txt", "a") do file
+        write(file, @sprintf("%.4f",h_max[1]))
+    end
 else
     @timeit to "plot result" begin
         plot_model(grid, state)

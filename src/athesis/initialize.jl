@@ -1,6 +1,6 @@
 # initialize.jl
 
-using CuArrays
+using CUDA
 using OffsetArrays
 
 function init_model_state(grid, h0, u0, v0, w0, useCUDA)
