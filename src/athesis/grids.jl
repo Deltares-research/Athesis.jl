@@ -1,4 +1,5 @@
 # grids.jl
+
 using OffsetArrays
 
 mutable struct Grid{T}
@@ -18,22 +19,8 @@ function grid_coords(nx, ny, nz, Δx, Δy, Δz, useCUDA)
     # Create 3D structured grid
     # For now cell centered
     x = Array{Float64,1}(undef,nx+2)
-    x = OffsetArray(x, (0:nx+1))
-    for n = 0:nx+1
-        x[n] = (n-0.5)*Δx
-    end
-
     y = Array{Float64,1}(undef,ny+2)
-    y = OffsetArray(y, (0:ny+1))
-    for n = 0:ny+1
-        y[n] = (n-0.5)*Δy
-    end
-
     z = Array{Float64,1}(undef,nz+2)
-    z = OffsetArray(z, (0:nz+1))
-    for n = 0:nz+1
-        z[n] = (n-0.5)*Δz
-    end
 
     if useCUDA
         # Convert to CUDA Arrays
@@ -41,6 +28,23 @@ function grid_coords(nx, ny, nz, Δx, Δy, Δz, useCUDA)
         y = CuArray(y)
         z = CuArray(z)
     end
+
+    x = OffsetArray(x, (0:nx+1))
+    y = OffsetArray(y, (0:ny+1))
+    z = OffsetArray(z, (0:nz+1))
+
+    for n = 0:nx+1
+        x[n] = (n-0.5)*Δx
+    end
+
+    for n = 0:ny+1
+        y[n] = (n-0.5)*Δy
+    end
+
+    for n = 0:nz+1
+        z[n] = (n-0.5)*Δz
+    end
+
     return x, y, z
 end
 

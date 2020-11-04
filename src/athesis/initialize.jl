@@ -119,7 +119,10 @@ function model_initialize(useCUDA)
     recharge = Recharge(const_recharge, 0.0, recharge_factor)
 
     # Store the boundary conditions
-    boundary_conditions = BoundaryConditions(boundary_pressure[1], boundary_pressure[2])
+    if (useCUDA)
+        boundary_pressure = CuArray(boundary_pressure)
+    end
+    boundary_conditions = BoundaryConditions(boundary_pressure)
 
     # Group some parameters in the model.
     # For now sources and boundary conditions
