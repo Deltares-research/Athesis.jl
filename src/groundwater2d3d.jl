@@ -102,12 +102,10 @@ function groundwater3d(isBenchmark = false, useGPU = false)
 
         # Update the old to the new solution
         @timeit to "update state" begin
-            #bc = model.boundary_conditions
-            #new2old!(state,bc)
-            state.h = copy(state.hⁿ⁺¹)
-            state.u = copy(state.uⁿ⁺¹)
-            state.v = copy(state.vⁿ⁺¹)
-            state.w = copy(state.wⁿ⁺¹)
+            state.h .= state.hⁿ⁺¹
+            state.u .= state.uⁿ⁺¹
+            state.v .= state.vⁿ⁺¹
+            state.w .= state.wⁿ⁺¹
             time += Δt
         end
 
