@@ -1,7 +1,5 @@
 # kernels_pressure_equation.jl
 
-include("operators.jl")
-
 function averageK(K, i, j, k)
     Kw = harmonic_mean(K[i-1,j  ,k  ],K[i  ,j  ,k  ])
     Ke = harmonic_mean(K[i  ,j  ,k  ],K[i+1,j  ,k  ])

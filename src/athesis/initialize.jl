@@ -1,12 +1,7 @@
 # initialize.jl
 
-using CuArrays
+using CUDA
 using OffsetArrays
-
-include("model_input.jl")
-include("grids.jl")
-include("external_forcing.jl")
-include("model.jl")
 
 function init_model_state(grid, h0, u0, v0, w0, useCUDA)
     # Allocate model state
@@ -71,7 +66,7 @@ function init_parameters(nx, ny, nz, p0, useCUDA)
 end
 
 
-function model_initialize()
+function model_initialize(useCUDA)
 
     println("Initialize the model ...")
 
@@ -79,7 +74,6 @@ function model_initialize()
     input = model_input()
 
     # Initialize the correct sizes/dimensions of the model
-    useCUDA   = input.useCUDA
     nx        = input.nx
     ny        = input.ny
     nz        = input.nz
@@ -146,7 +140,7 @@ function model_initialize()
     time_data  = Time_data(Δt, tend, time, maxsteps)
 
     # Solver data
-    hclose = 1e-10
+    hclose = 1e-5
     Δh = copy(K)
     fill!(Δh, 0.0)
     solver_data = Solver_data(hclose, Δh)

@@ -1,8 +1,5 @@
-# model.jl
-
 abstract type Modeltype
 end
-
 
 mutable struct Parameters{T}
     K::T

@@ -1,10 +1,4 @@
-using CUDAdrv, CUDAnative
-using CuArrays
-using TimerOutputs
-
-include("kernels.jl")
-include("model.jl")
-include("grids.jl")
+using CUDA
 
 # This is the present data storage:
 # grid       = (nx, ny, nz, Δx, Δy, Δz, x, y, z)
