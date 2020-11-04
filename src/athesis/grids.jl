@@ -1,10 +1,6 @@
 # grids.jl
 
-import Adapt
 using OffsetArrays
-
-# Adapt an offset CuArray to work nicely with CUDA kernels.
-Adapt.adapt_structure(to, x::OffsetArray) = OffsetArray(Adapt.adapt(to, parent(x)), x.offsets)
 
 mutable struct Grid{T}
     #grid_type::String
