@@ -112,7 +112,6 @@ if isBenchmark
     # todo: how to get the physical array from the full array??
     h_max = find_maximum(state.hⁿ⁺¹)
     println(h_max)
-    end
 else
     @timeit to "plot result" begin
         plot_model(grid, state)
