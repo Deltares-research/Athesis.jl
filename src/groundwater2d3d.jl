@@ -1,5 +1,4 @@
 # 3D groundwater
-using Printf
 using Plots
 using CUDA
 using TimerOutputs
@@ -113,10 +112,6 @@ if isBenchmark
     # todo: how to get the physical array from the full array??
     h_max = find_maximum(state.hⁿ⁺¹)
     println(h_max)
-
-    rm("result.txt", force=true)
-    open("result.txt", "a") do file
-        write(file, @sprintf("%.4f",h_max[1]))
     end
 else
     @timeit to "plot result" begin
