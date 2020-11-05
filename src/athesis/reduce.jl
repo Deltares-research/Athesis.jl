@@ -7,7 +7,7 @@
 #
 # Based on devblogs.nvidia.com/parallelforall/faster-parallel-reductions-kepler/
 
-using CUDAdrv, CUDAnative, CuArrays
+using CUDA
 
 
 #
