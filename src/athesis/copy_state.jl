@@ -1,6 +1,6 @@
 #copy_state.jl
 
-using CuArrays
+using CUDA
 
 function new2old!(state::State,bc::BoundaryConditions)
     h    = state.h
