@@ -1,6 +1,9 @@
 # grids.jl
 
 using OffsetArrays
+using Adapt
+
+Adapt.adapt_structure(to, x::OffsetArray) = OffsetArray(adapt(to, parent(x)), x.offsets)
 
 mutable struct Grid{T}
     #grid_type::String

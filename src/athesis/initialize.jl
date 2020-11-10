@@ -141,7 +141,7 @@ function model_initialize(useCUDA)
 
     # Solver data
     hclose = 1e-5
-    Δh = copy(K)
+    Δh = copy(state.h)
     fill!(Δh, 0.0)
     solver_data = Solver_data(hclose, Δh)
 
