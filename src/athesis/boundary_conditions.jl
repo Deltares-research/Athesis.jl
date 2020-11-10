@@ -54,7 +54,7 @@ function boundaryloop!(kernel::Function,
     # Grid loop on GPU for CUarrays (CUDA)
 
     #ths = (8,8,4)
-    ths = (8,8)
+    ths = (16,16)
     nb1 = Int(ceil(n1/ths[1]))
     nb2 = Int(ceil(n2/ths[2]))
     bls = (nb1,nb2)
