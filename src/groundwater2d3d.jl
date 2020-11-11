@@ -30,110 +30,117 @@ function groundwater3d(isBenchmark = false, useGPU = false)
 
     @timeit to "run time" begin
 
-    # Initialize the model
-    println("Running 3D groundwater model:")
+        # Initialize the model
+        println("Running 3D groundwater model:")
 
-    @timeit to "initialization" begin
-        grid, model, state, parameters, time_data, solver_data = model_initialize(useCUDA)
+        @timeit to "initialization" CUDA.@sync begin
+            grid, model, state, parameters, time_data, solver_data = model_initialize(useCUDA)
 
-        # Unpack time parameters required for the time loop
-        Δt       = time_data.Δt
-        tend     = time_data.tend
-        maxsteps = time_data.maxsteps
-        time     = time_data.time
+            # Unpack time parameters required for the time loop
+            Δt       = time_data.Δt
+            tend     = time_data.tend
+            maxsteps = time_data.maxsteps
+            time     = time_data.time
 
-        # Now start the time loop
-        println("Starting time loop ...")
+            # Now start the time loop
+            println("Starting time loop ...")
 
-        # Initialize the present time
-        time = 0.0
-    end
-
-    @timeit to "solve" begin
-
-    bulge = []
-
-    for n = 1:maxsteps
-
-        # Add the sources
-        @timeit to "set rhs" begin
-            set_sources!(time, model.source)
-            set_recharge!(time,model.recharge)
+            # Initialize the present time
+            time = 0.0
         end
 
-        @timeit to "set_boundaries" begin
-            bc = model.boundary_conditions
-            set_boundaries!(grid, state, bc)
-        end
+        @timeit to "solve" begin
 
-        @timeit to "solve pressure" begin
-            pressure_equation!(grid, model, state, parameters, time_data)
-        end
-        @timeit to "solve darcy" begin
-            #darcy_equation!(grid, model, state, parameters, time_data)
-        end
+            bulge = []
 
-        # check convergence
-        @timeit to "convergence check" begin
-            has_converged, Δh_max, max_index = check_convergence!(state, solver_data)
-            if (has_converged)
-                println()
-                println("-- solver converged --")
-                println("Δh_max = ", Δh_max, " at ", max_index)
-                println("nr. of iters = ", n)
-                println()
+            for n = 1:maxsteps
 
-                # todo: update h_n+1 here
-                # ...
-                break
+                # Add the sources
+                @timeit to "set rhs" CUDA.@sync begin
+                    set_sources!(time, model.source)
+                    set_recharge!(time,model.recharge)
+                end
+
+                @timeit to "set_boundaries" CUDA.@sync begin
+                    bc = model.boundary_conditions
+                    set_boundaries!(grid, state, bc)
+                end
+
+                @timeit to "solve pressure" CUDA.@sync begin
+                    pressure_equation!(grid, model, state, parameters, time_data)
+                end
+                @timeit to "solve darcy" CUDA.@sync begin
+                    #darcy_equation!(grid, model, state, parameters, time_data)
+                end
+
+                # check convergence
+                @timeit to "convergence check" CUDA.@sync begin
+                    has_converged = false
+                    if mod(n,500) == 0
+                        has_converged, Δh_max, max_index = check_convergence!(state, solver_data)
+                        if (has_converged)
+                            println()
+                            println("-- solver converged --")
+                            println("Δh_max = ", Δh_max, " at ", max_index)
+                            println("nr. of iters = ", n)
+                            println()
+
+                            # todo: update h_n+1 here
+                            # ...
+                            break
+                        end
+                    end
+                end
+
+                @timeit to "append time history" CUDA.@sync begin
+                    append!(bulge, state.hⁿ⁺¹[Int(ceil(grid.nx/2)),Int(ceil(grid.ny/2)),grid.nz])
+                end
+
+                #if mod(n,100) == 0
+                #    plot_model(grid, state)
+                #end
+                @timeit to "print iterations" CUDA.@sync begin
+                    if mod(n,500) == 0
+                        println("iter = ", n, ", Δh_max = ", Δh_max, " at ", max_index)
+                    end
+                end
+
+                # Update the old to the new solution
+                @timeit to "update state" CUDA.@sync begin
+                    #bc = model.boundary_conditions
+                    #new2old!(state, bc)
+                    state.h.parent .= state.hⁿ⁺¹.parent
+                    state.u.parent .= state.uⁿ⁺¹.parent
+                    state.v.parent .= state.vⁿ⁺¹.parent
+                    state.w.parent .= state.wⁿ⁺¹.parent
+                    time += Δt
+                end
+
             end
         end
 
-        @timeit to "append time history" begin
-            append!(bulge, state.hⁿ⁺¹[Int(ceil(grid.nx/2)),Int(ceil(grid.ny/2)),grid.nz])
-        end
-
-        #if mod(n,100) == 0
-        #    plot_model(grid, state)
-        #end
-        @timeit to "print iterations" begin
-            println("iter = ", n, ", Δh_max = ", Δh_max, " at ", max_index)
-        end
-
-        # Update the old to the new solution
-        @timeit to "update state" begin
-            state.h .= state.hⁿ⁺¹
-            state.u .= state.uⁿ⁺¹
-            state.v .= state.vⁿ⁺¹
-            state.w .= state.wⁿ⁺¹
-            time += Δt
-        end
-
     end
 
-end
-
-if isBenchmark
-    # todo: how to get the physical array from the full array??
-    h_max = find_maximum(state.hⁿ⁺¹)
-    println(h_max)
-else
-    @timeit to "plot result" begin
-        plot_model(grid, state)
-        p = plot(bulge)
-        display(p)
+    if isBenchmark
+        # todo: how to get the physical array from the full array??
+        h_max = find_maximum(state.hⁿ⁺¹)
+        println(h_max)
+    else
+        @timeit to "plot result" CUDA.@sync begin
+            plot_model(grid, state)
+            p = plot(bulge)
+            display(p)
+        end
     end
-end
 
-end
 
-print_timer(to)
+    print_timer(to)
 
 end
 
 function check_convergence!(state::State, solver_data::Solver_data)
-    solver_data.Δh .= abs.(state.hⁿ⁺¹ - state.h)
-    Δh_max, max_index = find_maximum(solver_data.Δh)
+    solver_data.Δh.parent .= abs.(state.hⁿ⁺¹.parent - state.h.parent)
+    Δh_max, max_index = find_maximum(solver_data.Δh.parent)
     if Δh_max > solver_data.hclose
         return false, Δh_max, max_index
     end

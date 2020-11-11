@@ -35,9 +35,9 @@ function model_input()
     println("Reading model input ...")
 
     # Model size per dimension (-)
-    nx   = 11
-    ny   = 11
-    nz   = 1
+    nx   = 101
+    ny   = 101
+    nz   = 11
 
     # Grid sizes (m)
     Δx   = 80.0/(nx+1)

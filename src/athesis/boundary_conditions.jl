@@ -48,9 +48,9 @@ end
 
 
 function boundaryloop!(kernel::Function,
-                   h::CuArray,
-                   hⁿ⁺¹::CuArray,
-                   n1, n2, boundaryLength, bc)
+                   h::OffsetArray{T,N,CuArray{T,N}},
+                   hⁿ⁺¹::OffsetArray{T,N,CuArray{T,N}},
+                   n1, n2, boundaryLength, bc) where {T,N}
     # Grid loop on GPU for CUarrays (CUDA)
 
     #ths = (8,8,4)

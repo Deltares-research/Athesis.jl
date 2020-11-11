@@ -18,12 +18,22 @@ function init_model_state(grid, h0, u0, v0, w0, useCUDA)
     v = fill(v0, (nx+2, ny+2, nz+2))
     w = fill(w0, (nx+2, ny+2, nz+2))
 
+    hn = fill(h0, (nx+2, ny+2, nz+2))
+    un = fill(u0, (nx+2, ny+2, nz+2))
+    vn = fill(v0, (nx+2, ny+2, nz+2))
+    wn = fill(w0, (nx+2, ny+2, nz+2))
+
     if useCUDA
         # Convert to CUDA Arrays
         h = CuArray(h)
         u = CuArray(u)
         v = CuArray(v)
         w = CuArray(w)
+
+        hn = CuArray(hn)
+        un = CuArray(un)
+        vn = CuArray(vn)
+        wn = CuArray(wn)
     end
 
     # Shift indices to let the arrays run from index 0
@@ -32,11 +42,16 @@ function init_model_state(grid, h0, u0, v0, w0, useCUDA)
     v = OffsetArray(v, (0:nx+1, 0:ny+1, 0:nz+1))
     w = OffsetArray(w, (0:nx+1, 0:ny+1, 0:nz+1))
 
+    hⁿ⁺¹ = OffsetArray(hn, (0:nx+1, 0:ny+1, 0:nz+1))
+    uⁿ⁺¹ = OffsetArray(un, (0:nx+1, 0:ny+1, 0:nz+1))
+    vⁿ⁺¹ = OffsetArray(vn, (0:nx+1, 0:ny+1, 0:nz+1))
+    wⁿ⁺¹ = OffsetArray(wn, (0:nx+1, 0:ny+1, 0:nz+1))
+
     # Copy the state to the updated state
-    hⁿ⁺¹ = copy(h)
-    uⁿ⁺¹ = copy(u)
-    vⁿ⁺¹ = copy(v)
-    wⁿ⁺¹ = copy(w)
+    #hⁿ⁺¹ = copy(h)
+    #uⁿ⁺¹ = copy(u)
+    #vⁿ⁺¹ = copy(v)
+    #wⁿ⁺¹ = copy(w)
 
     state = State(h, u, v, w, hⁿ⁺¹, uⁿ⁺¹, vⁿ⁺¹, wⁿ⁺¹)
     return state
@@ -124,6 +139,7 @@ function model_initialize(useCUDA)
     end
     boundary_conditions = BoundaryConditions(boundary_pressure)
 
+
     # Group some parameters in the model.
     # For now sources and boundary conditions
     model      = Model(source, recharge, boundary_conditions)
@@ -141,8 +157,12 @@ function model_initialize(useCUDA)
 
     # Solver data
     hclose = 1e-5
-    Δh = copy(state.h)
-    fill!(Δh, 0.0)
+    Δh = fill(0.0, (grid.nx+2, grid.ny+2, grid.nz+2))
+    if useCUDA
+        # Convert to CUDA Arrays
+        Δh = CuArray(Δh)
+    end
+    Δh = OffsetArray(Δh, (0:grid.nx+1, 0:grid.ny+1, 0:grid.nz+1))
     solver_data = Solver_data(hclose, Δh)
 
     return grid, model, state, parameters, time_data, solver_data
