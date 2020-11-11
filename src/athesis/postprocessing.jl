@@ -2,21 +2,12 @@
 
 using Plots
 
-# function prepare_plots(state)
-#     plotvars = Dict("h"=>state.h, "u"=>state.u, "v"=>state.v, "w"=>state.w)
-# end
-#
-# # TODO: with multiple dispatch!
-#
-# function set_plot_properties()
-#     plot_title = ["water table h [m]" "horizontal velocity u [m/s]" "horizontal velocity v [m/s]" "vertical velocity w [m/s]"]
-#     plot_layout = (4,1)
-#     return plot_title, plot_layout
-# end
-
-
-function plot_model(grid, state)
+function plotSimulation(simulation)
     # Plotting of 3D model
+
+    grid = simulation.grid
+    state = simulation.state
+
 
     ilayer = grid.nz
 

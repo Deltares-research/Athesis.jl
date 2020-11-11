@@ -2,6 +2,7 @@
 
 using CUDA
 using OffsetArrays
+using TimerOutputs
 
 function init_model_state(grid, h0, u0, v0, w0, useCUDA)
     # Allocate model state
@@ -47,12 +48,6 @@ function init_model_state(grid, h0, u0, v0, w0, useCUDA)
     vⁿ⁺¹ = OffsetArray(vn, (0:nx+1, 0:ny+1, 0:nz+1))
     wⁿ⁺¹ = OffsetArray(wn, (0:nx+1, 0:ny+1, 0:nz+1))
 
-    # Copy the state to the updated state
-    #hⁿ⁺¹ = copy(h)
-    #uⁿ⁺¹ = copy(u)
-    #vⁿ⁺¹ = copy(v)
-    #wⁿ⁺¹ = copy(w)
-
     state = State(h, u, v, w, hⁿ⁺¹, uⁿ⁺¹, vⁿ⁺¹, wⁿ⁺¹)
     return state
 end
@@ -81,36 +76,33 @@ function init_parameters(nx, ny, nz, p0, useCUDA)
 end
 
 
-function model_initialize(useCUDA)
+function initSimulation(modelInput, useCUDA, to::TimerOutput)
 
     println("Initialize the model ...")
 
-    # Get/read model input
-    input = model_input()
-
     # Initialize the correct sizes/dimensions of the model
-    nx        = input.nx
-    ny        = input.ny
-    nz        = input.nz
-    Δx        = input.Δx
-    Δy        = input.Δy
-    Δz        = input.Δz
-    Δt        = input.Δt
-    tend      = input.tend
-    K0        = input.K0
-    S0        = input.S0
-    h0        = input.h0
-    u0        = input.u0
-    v0        = input.v0
-    w0        = input.w0
-    source    = input.source
-    i_src     = input.i_src
-    j_src     = input.j_src
-    k_src     = input.k_src
-    duration  = input.duration
-    const_recharge = input.const_recharge
-    recharge_factor = input.recharge_factor
-    boundary_pressure = input.boundary_pressure
+    nx        = modelInput.nx
+    ny        = modelInput.ny
+    nz        = modelInput.nz
+    Δx        = modelInput.Δx
+    Δy        = modelInput.Δy
+    Δz        = modelInput.Δz
+    Δt        = modelInput.Δt
+    tend      = modelInput.tend
+    K0        = modelInput.K0
+    S0        = modelInput.S0
+    h0        = modelInput.h0
+    u0        = modelInput.u0
+    v0        = modelInput.v0
+    w0        = modelInput.w0
+    source    = modelInput.source
+    i_src     = modelInput.i_src
+    j_src     = modelInput.j_src
+    k_src     = modelInput.k_src
+    duration  = modelInput.duration
+    const_recharge = modelInput.const_recharge
+    recharge_factor = modelInput.recharge_factor
+    boundary_pressure = modelInput.boundary_pressure
 
     # The grid
     x, y, z    = grid_coords(nx, ny, nz, Δx, Δy, Δz, useCUDA)
@@ -148,12 +140,12 @@ function model_initialize(useCUDA)
     parameters = Parameters(K, specific_storage)
 
     # Input object is no longer needed
-    input = nothing
+    modelInput = nothing
 
     # Time related data
     maxsteps   = round(Int64, tend/Δt)
     time       = 0.0
-    time_data  = Time_data(Δt, tend, time, maxsteps)
+    timeData  = TimeData(Δt, tend, time, maxsteps)
 
     # Solver data
     hclose = 1e-5
@@ -163,7 +155,7 @@ function model_initialize(useCUDA)
         Δh = CuArray(Δh)
     end
     Δh = OffsetArray(Δh, (0:grid.nx+1, 0:grid.ny+1, 0:grid.nz+1))
-    solver_data = Solver_data(hclose, Δh)
+    solverData = SolverData(hclose, Δh)
 
-    return grid, model, state, parameters, time_data, solver_data
+    return Simulation(grid, model, state, parameters, timeData, solverData)
 end

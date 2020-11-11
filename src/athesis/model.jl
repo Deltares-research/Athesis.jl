@@ -1,6 +1,7 @@
 abstract type Modeltype
 end
 
+
 mutable struct Parameters{T}
     K::T
     specific_storage::AbstractFloat
@@ -56,38 +57,29 @@ mutable struct Recharge
     recharge_factor::AbstractFloat
 end
 
-mutable struct Model #{T}
-    #modeltype::Modeltype
-    #state::State
+mutable struct Model
     source::Source
     recharge::Recharge
     boundary_conditions::BoundaryConditions
 end
 
-mutable struct Time_data
+mutable struct TimeData
     Δt::AbstractFloat
     tend::AbstractFloat
     time::AbstractFloat
     maxsteps::Int64
-    #Courant::Float64
-    #time_integration::String
 end
 
-mutable struct Solver_data{T}
+mutable struct SolverData{T}
     hclose::AbstractFloat
     Δh::T
 end
 
-
-mutable struct Backend
-    GPU::Bool
-
-end
-mutable struct TimeIntegration
-    name::String
-end
-
-mutable struct Solver
-    name::String
-    conv_limit::AbstractFloat
+mutable struct Simulation
+    grid
+    model
+    state
+    parameters
+    timeData
+    solverData
 end

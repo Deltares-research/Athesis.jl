@@ -49,7 +49,7 @@ function gridloop!(kernel::Function,
                    state::State,
                    grid::Grid,
                    parameters::Parameters,
-                   time_data::Time_data)
+                   time_data::TimeData)
     # Grid loop on GPU for CUarrays (CUDA)
 
     # Unpack required variables
@@ -90,7 +90,7 @@ function gridloop!(kernel::Function,
                    state::State,
                    grid::Grid,
                    parameters::Parameters,
-                   time_data::Time_data)
+                   time_data::TimeData)
     # Grid loop for normal arrays on CPU
 
     # Unpack required variables

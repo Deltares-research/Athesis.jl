@@ -1,9 +1,12 @@
 # model_input.jl
 
-struct Model_input{T}
+struct ModelInput{T}
     nx::Int64
     ny::Int64
     nz::Int64
+    Lx::AbstractFloat
+    Ly::AbstractFloat
+    Lz::AbstractFloat
     Δx::AbstractFloat
     Δy::AbstractFloat
     Δz::AbstractFloat
@@ -25,24 +28,23 @@ struct Model_input{T}
     boundary_pressure::T
 end
 
-
-#
-# This function takes the model input
-# Creates the model
-#
-function model_input()
-
-    println("Reading model input ...")
+# returns default model input
+function getDefaultInput()
 
     # Model size per dimension (-)
-    nx   = 101
-    ny   = 101
-    nz   = 11
+    nx   = 11
+    ny   = 11
+    nz   = 1
+
+    # Grid extent
+    Lx = 80.0
+    Ly = 80.0
+    Lz = 10.0
 
     # Grid sizes (m)
-    Δx   = 80.0/(nx+1)
-    Δy   = 80.0/(ny+1)
-    Δz   = 10.0
+    Δx   = Lx/(nx+1)
+    Δy   = Ly/(ny+1)
+    Δz   = Lz/(nz+1)
 
     # hydraulic_conductivity (m/s)
     K0   = 10.0
@@ -99,6 +101,6 @@ function model_input()
 
     # Store the input in tuple "input"
     println("Grid specified: 3D grid with\n nx = ", nx, ",\n ny = ", ny, ",\n nz = ", nz, " and\n Δx = ", Δx, ",\n Δy = ", Δy, ",\n Δz = ", Δz)
-    input = Model_input(nx, ny, nz, Δx, Δy, Δz, Δt, tend, K0, S0, h0, u0, v0, w0, source, i_src, j_src, k_src, duration, const_recharge, recharge_factor, boundary_pressure)
+    input = ModelInput(nx, ny, nz, Lx, Ly, Lz, Δx, Δy, Δz, Δt, tend, K0, S0, h0, u0, v0, w0, source, i_src, j_src, k_src, duration, const_recharge, recharge_factor, boundary_pressure)
 
 end
