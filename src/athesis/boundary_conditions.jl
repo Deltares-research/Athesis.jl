@@ -1,7 +1,7 @@
 # Treatment of boundary conditions
 # Using abstract loops on either CPU or GPU
 
-function set_boundaries!(grid, state, bc)
+function setBoundaries!(grid, state, bc)
     # For now we simply set 2 Dirichlet boundary conditions on the west and east boundaries
     # and we set 4 Neumann boundary conditions on the south, north, bottom and top boundaries
     # All boundaries are pressure boundaries for now
@@ -10,9 +10,9 @@ function set_boundaries!(grid, state, bc)
     ny = grid.ny
     nz = grid.nz
 
-    boundaryloop!(westBoundary!, state.h, state.hⁿ⁺¹, ny, nz, nx+1, bc.bc_pressure[1])
+    boundaryloop!(westBoundary!, state.h, state.hⁿ⁺¹, ny, nz, nx+1, bc.bcPressure[1])
 
-    boundaryloop!(eastBoundary!, state.h, state.hⁿ⁺¹, ny, nz, nx+1, bc.bc_pressure[2])
+    boundaryloop!(eastBoundary!, state.h, state.hⁿ⁺¹, ny, nz, nx+1, bc.bcPressure[2])
 
     boundaryloop!(southBoundary!, state.h, state.hⁿ⁺¹, nx, nz, ny+1, 0.0)
 
@@ -32,7 +32,7 @@ function set_boundaries!(grid, state, bc)
 
 end
 
-function cuda_wrap_kernel!(kernel::Function,
+function cudaWrapKernel!(kernel::Function,
                            h, hⁿ⁺¹,
                            n1, n2, boundaryLength,
                            bc)
@@ -58,7 +58,7 @@ function boundaryloop!(kernel::Function,
     nb1 = Int(ceil(n1/ths[1]))
     nb2 = Int(ceil(n2/ths[2]))
     bls = (nb1,nb2)
-    @cuda threads=ths blocks=bls cuda_wrap_kernel!(kernel, h, hⁿ⁺¹, n1, n2, boundaryLength, bc)
+    @cuda threads=ths blocks=bls cudaWrapKernel!(kernel, h, hⁿ⁺¹, n1, n2, boundaryLength, bc)
 end
 
 

@@ -23,9 +23,10 @@ struct ModelInput{T}
     j_src::Int64
     k_src::Int64
     duration::AbstractFloat
-    const_recharge::AbstractFloat
-    recharge_factor::AbstractFloat
-    boundary_pressure::T
+    ΔhConv::AbstractFloat
+    constRecharge::AbstractFloat
+    rechargeFactor::AbstractFloat
+    boundaryPressure::T
 end
 
 # returns default model input
@@ -63,9 +64,9 @@ function getDefaultInput()
     w0   = 0.0     # (m/s)
 
     # Boundary conditions
-    h_bc_west = 1.0
-    h_bc_east = 1.0
-    boundary_pressure = [h_bc_west, h_bc_east]
+    hBCWest = 1.0
+    hBCEast = 1.0
+    boundaryPressure = [hBCWest, hBCEast]
 
     # Source (well) data
     i_src  = 1
@@ -80,8 +81,8 @@ function getDefaultInput()
     # I is the unit rescharge flux (m/s)
     # A is the cell area for cell n
     # M is a multiplier/factor
-    const_recharge = 5.0e-4 * Δx * Δy# / (24*3600.) # (m3/s)
-    recharge_factor = 1.0      # (-)
+    constRecharge = 5.0e-4 * Δx * Δy# / (24*3600.) # (m3/s)
+    rechargeFactor = 1.0      # (-)
 
     # Test model:
     # 9 x 9 x 3: storage = 0.1x10-4
@@ -92,6 +93,9 @@ function getDefaultInput()
     # Simulation end time (s)
     tend = 100000.0
 
+    # Convergence criterion for steady state
+    ΔhConv = 1e-8
+
     # Set corresponding data type
     # if useCUDA
     #     data_type = CuArray
@@ -101,6 +105,6 @@ function getDefaultInput()
 
     # Store the input in tuple "input"
     println("Grid specified: 3D grid with\n nx = ", nx, ",\n ny = ", ny, ",\n nz = ", nz, " and\n Δx = ", Δx, ",\n Δy = ", Δy, ",\n Δz = ", Δz)
-    input = ModelInput(nx, ny, nz, Lx, Ly, Lz, Δx, Δy, Δz, Δt, tend, K0, S0, h0, u0, v0, w0, source, i_src, j_src, k_src, duration, const_recharge, recharge_factor, boundary_pressure)
+    input = ModelInput(nx, ny, nz, Lx, Ly, Lz, Δx, Δy, Δz, Δt, tend, K0, S0, h0, u0, v0, w0, source, i_src, j_src, k_src, duration, ΔhConv, constRecharge, rechargeFactor, boundaryPressure)
 
 end

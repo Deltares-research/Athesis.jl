@@ -4,12 +4,12 @@ end
 
 mutable struct Parameters{T}
     K::T
-    specific_storage::AbstractFloat
+    specificStorage::AbstractFloat
     #Δt::Float64
 end
 
 mutable struct BoundaryConditions{T}
-    bc_pressure::T
+    bcPressure::T
 end
 
 mutable struct Physics{T}
@@ -24,8 +24,8 @@ mutable struct ModelComponents
     #bottom_friction::Bool
     #wind_friction::Bool
     #gravity::Bool
-    hydraulic_conductivity::Bool
-    massflux::Bool
+    hydraulicConductivity::Bool
+    massFlux::Bool
     pressure::Bool
     sources::Bool
 end
@@ -47,20 +47,20 @@ mutable struct Source{T}
     k_src::Int64
     duration::AbstractFloat
     discharge::AbstractFloat
-    external_source::T
+    externalSource::T
 end
 
 mutable struct Recharge
     #duration::AbstractFloat
-    const_recharge::AbstractFloat
-    recharge_flux::AbstractFloat
-    recharge_factor::AbstractFloat
+    constRecharge::AbstractFloat
+    rechargeFlux::AbstractFloat
+    rechargeFactor::AbstractFloat
 end
 
 mutable struct Model
     source::Source
     recharge::Recharge
-    boundary_conditions::BoundaryConditions
+    boundaryConditions::BoundaryConditions
 end
 
 mutable struct TimeData
@@ -71,7 +71,7 @@ mutable struct TimeData
 end
 
 mutable struct SolverData{T}
-    hclose::AbstractFloat
+    ΔhConv::AbstractFloat
     Δh::T
 end
 

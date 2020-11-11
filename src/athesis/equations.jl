@@ -15,30 +15,30 @@
 # source     = (i_src, j_src, k_src, n_src, externals)
 
 
-function pressure_equation!(grid, model, state, parameters, time_data)
+function pressureEquation!(grid, model, state, parameters, timeData)
 
     #println("   Solving the pressure equation ...")
 
     # Unpack only source to be able to dispatch on type (Array or CuArray)
-    source   = model.source.external_source
+    source   = model.source.externalSource
 
     # Add the model recharge to top layer
-    source[:,:,grid.nz] .+= model.recharge.recharge_flux
+    source[:,:,grid.nz] .+= model.recharge.rechargeFlux
 
     # Solve for the pressure/head
-    gridloop!(pressure_kernel!, source, state, grid, parameters, time_data)
+    gridloop!(pressureKernel!, source, state, grid, parameters, timeData)
 end
 
 
 
-function darcy_equation!(grid, model, state, parameters, time_data)
+function darcyEquation!(grid, model, state, parameters, timeData)
 
     # Compute the velocities from the darcy equation using the pressure
     # For now cell-centered and collocated
     #println("   Solving the Darcy equation ...")
 
     # Unpack only source to be able to dispatch on type (Array or CuArray)
-    source = model.source.external_source
+    source = model.source.externalSource
 
-    gridloop!(darcy_kernel!, source, state, grid, parameters, time_data)
+    gridloop!(darcyKernel!, source, state, grid, parameters, timeData)
 end

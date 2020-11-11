@@ -13,12 +13,14 @@ include("athesis/gridloop.jl")
 include("athesis/kernels_pressure_equation.jl")
 include("athesis/kernels_darcy_equation.jl")
 include("athesis/operators.jl")
+include("athesis/fields.jl")
 
 export
     # API
     getDefaultInput,
     initSimulation,
-    runSimulation,
+    runSimulation!,
+    doTimestep!,
     plotSimulation,
 
     # data structures

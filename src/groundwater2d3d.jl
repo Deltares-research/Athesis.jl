@@ -20,7 +20,7 @@ function groundwater3d(isBenchmark = false, useGPU = false)
         end
 
         @timeit to "run"  CUDA.@sync begin
-            runSimulation(simulation, to)
+            runSimulation!(simulation, to)
         end
 
         @timeit to "plot result" CUDA.@sync begin
