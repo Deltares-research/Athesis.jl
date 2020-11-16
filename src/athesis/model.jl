@@ -1,14 +1,15 @@
 abstract type Modeltype
 end
 
+
 mutable struct Parameters{T}
     K::T
-    specific_storage::AbstractFloat
+    specificStorage::AbstractFloat
     #Δt::Float64
 end
 
 mutable struct BoundaryConditions{T}
-    bc_pressure::T
+    bcPressure::T
 end
 
 mutable struct Physics{T}
@@ -23,8 +24,8 @@ mutable struct ModelComponents
     #bottom_friction::Bool
     #wind_friction::Bool
     #gravity::Bool
-    hydraulic_conductivity::Bool
-    massflux::Bool
+    hydraulicConductivity::Bool
+    massFlux::Bool
     pressure::Bool
     sources::Bool
 end
@@ -46,48 +47,39 @@ mutable struct Source{T}
     k_src::Int64
     duration::AbstractFloat
     discharge::AbstractFloat
-    external_source::T
+    externalSource::T
 end
 
 mutable struct Recharge
     #duration::AbstractFloat
-    const_recharge::AbstractFloat
-    recharge_flux::AbstractFloat
-    recharge_factor::AbstractFloat
+    constRecharge::AbstractFloat
+    rechargeFlux::AbstractFloat
+    rechargeFactor::AbstractFloat
 end
 
-mutable struct Model #{T}
-    #modeltype::Modeltype
-    #state::State
+mutable struct Model
     source::Source
     recharge::Recharge
-    boundary_conditions::BoundaryConditions
+    boundaryConditions::BoundaryConditions
 end
 
-mutable struct Time_data
+mutable struct TimeData
     Δt::AbstractFloat
     tend::AbstractFloat
     time::AbstractFloat
     maxsteps::Int64
-    #Courant::Float64
-    #time_integration::String
 end
 
-mutable struct Solver_data{T}
-    hclose::AbstractFloat
+mutable struct SolverData{T}
+    ΔhConv::AbstractFloat
     Δh::T
 end
 
-
-mutable struct Backend
-    GPU::Bool
-
-end
-mutable struct TimeIntegration
-    name::String
-end
-
-mutable struct Solver
-    name::String
-    conv_limit::AbstractFloat
+mutable struct Simulation
+    grid
+    model
+    state
+    parameters
+    timeData
+    solverData
 end

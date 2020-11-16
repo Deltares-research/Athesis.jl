@@ -1,9 +1,12 @@
 # model_input.jl
 
-struct Model_input{T}
+struct ModelInput{T}
     nx::Int64
     ny::Int64
     nz::Int64
+    Lx::AbstractFloat
+    Ly::AbstractFloat
+    Lz::AbstractFloat
     Δx::AbstractFloat
     Δy::AbstractFloat
     Δz::AbstractFloat
@@ -20,29 +23,29 @@ struct Model_input{T}
     j_src::Int64
     k_src::Int64
     duration::AbstractFloat
-    const_recharge::AbstractFloat
-    recharge_factor::AbstractFloat
-    boundary_pressure::T
+    ΔhConv::AbstractFloat
+    constRecharge::AbstractFloat
+    rechargeFactor::AbstractFloat
+    boundaryPressure::T
 end
 
-
-#
-# This function takes the model input
-# Creates the model
-#
-function model_input()
-
-    println("Reading model input ...")
+# returns default model input
+function getDefaultInput()
 
     # Model size per dimension (-)
-    nx   = 101
-    ny   = 101
-    nz   = 11
+    nx   = 11
+    ny   = 11
+    nz   = 1
+
+    # Grid extent
+    Lx = 80.0
+    Ly = 80.0
+    Lz = 10.0
 
     # Grid sizes (m)
-    Δx   = 80.0/(nx+1)
-    Δy   = 80.0/(ny+1)
-    Δz   = 10.0
+    Δx   = Lx/(nx+1)
+    Δy   = Ly/(ny+1)
+    Δz   = Lz/(nz+1)
 
     # hydraulic_conductivity (m/s)
     K0   = 10.0
@@ -61,9 +64,9 @@ function model_input()
     w0   = 0.0     # (m/s)
 
     # Boundary conditions
-    h_bc_west = 1.0
-    h_bc_east = 1.0
-    boundary_pressure = [h_bc_west, h_bc_east]
+    hBCWest = 1.0
+    hBCEast = 1.0
+    boundaryPressure = [hBCWest, hBCEast]
 
     # Source (well) data
     i_src  = 1
@@ -78,8 +81,8 @@ function model_input()
     # I is the unit rescharge flux (m/s)
     # A is the cell area for cell n
     # M is a multiplier/factor
-    const_recharge = 5.0e-4 * Δx * Δy# / (24*3600.) # (m3/s)
-    recharge_factor = 1.0      # (-)
+    constRecharge = 5.0e-4 * Δx * Δy# / (24*3600.) # (m3/s)
+    rechargeFactor = 1.0      # (-)
 
     # Test model:
     # 9 x 9 x 3: storage = 0.1x10-4
@@ -90,6 +93,9 @@ function model_input()
     # Simulation end time (s)
     tend = 100000.0
 
+    # Convergence criterion for steady state
+    ΔhConv = 1e-8
+
     # Set corresponding data type
     # if useCUDA
     #     data_type = CuArray
@@ -99,6 +105,6 @@ function model_input()
 
     # Store the input in tuple "input"
     println("Grid specified: 3D grid with\n nx = ", nx, ",\n ny = ", ny, ",\n nz = ", nz, " and\n Δx = ", Δx, ",\n Δy = ", Δy, ",\n Δz = ", Δz)
-    input = Model_input(nx, ny, nz, Δx, Δy, Δz, Δt, tend, K0, S0, h0, u0, v0, w0, source, i_src, j_src, k_src, duration, const_recharge, recharge_factor, boundary_pressure)
+    input = ModelInput(nx, ny, nz, Lx, Ly, Lz, Δx, Δy, Δz, Δt, tend, K0, S0, h0, u0, v0, w0, source, i_src, j_src, k_src, duration, ΔhConv, constRecharge, rechargeFactor, boundaryPressure)
 
 end
