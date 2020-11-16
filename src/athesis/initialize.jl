@@ -33,82 +33,85 @@ end
 
 function initSimulation(modelInput, useCUDA, to::TimerOutput)
 
-    println("Initialize the model ...")
+    @synctimeit to "initialization" begin
 
-    # Initialize the correct sizes/dimensions of the model
-    nx        = modelInput.nx
-    ny        = modelInput.ny
-    nz        = modelInput.nz
-    Δx        = modelInput.Δx
-    Δy        = modelInput.Δy
-    Δz        = modelInput.Δz
-    Δt        = modelInput.Δt
-    tend      = modelInput.tend
-    K0        = modelInput.K0
-    S0        = modelInput.S0
-    h0        = modelInput.h0
-    u0        = modelInput.u0
-    v0        = modelInput.v0
-    w0        = modelInput.w0
-    source    = modelInput.source
-    i_src     = modelInput.i_src
-    j_src     = modelInput.j_src
-    k_src     = modelInput.k_src
-    duration  = modelInput.duration
-    ΔhConv    = modelInput.ΔhConv
-    constRecharge = modelInput.constRecharge
-    rechargeFactor = modelInput.rechargeFactor
-    boundaryPressure = modelInput.boundaryPressure
+        println("Initialize the model ...")
 
-    useOffset = true
-    noOffset  = false
+        # Initialize the correct sizes/dimensions of the model
+        nx        = modelInput.nx
+        ny        = modelInput.ny
+        nz        = modelInput.nz
+        Δx        = modelInput.Δx
+        Δy        = modelInput.Δy
+        Δz        = modelInput.Δz
+        Δt        = modelInput.Δt
+        tend      = modelInput.tend
+        K0        = modelInput.K0
+        S0        = modelInput.S0
+        h0        = modelInput.h0
+        u0        = modelInput.u0
+        v0        = modelInput.v0
+        w0        = modelInput.w0
+        source    = modelInput.source
+        i_src     = modelInput.i_src
+        j_src     = modelInput.j_src
+        k_src     = modelInput.k_src
+        duration  = modelInput.duration
+        ΔhConv    = modelInput.ΔhConv
+        constRecharge = modelInput.constRecharge
+        rechargeFactor = modelInput.rechargeFactor
+        boundaryPressure = modelInput.boundaryPressure
 
-    # The grid
-    x, y, z    = gridCoords(nx, ny, nz, Δx, Δy, Δz, useCUDA, useOffset)
-    grid       = Grid(nx, ny, nz, Δx, Δy, Δz, x, y, z)
+        useOffset = true
+        noOffset  = false
 
-    # State vector
-    state      = initModelState(grid, h0, u0, v0, w0, useCUDA)
+        # The grid
+        x, y, z    = gridCoords(nx, ny, nz, Δx, Δy, Δz, useCUDA, useOffset)
+        grid       = Grid(nx, ny, nz, Δx, Δy, Δz, x, y, z)
 
-    # External forcing
-    externals  = initField(0.0, nx, ny, nz, useCUDA, noOffset)
+        # State vector
+        state      = initModelState(grid, h0, u0, v0, w0, useCUDA)
 
-    # Model parameters
-    K          = initField(K0, nx, ny, nz, useCUDA, useOffset)
-    specificStorage = S0
+        # External forcing
+        externals  = initField(0.0, nx, ny, nz, useCUDA, noOffset)
 
-    # Sources/sinks
-    source     = Source(i_src, j_src, k_src, duration, source, externals)
-    setSources!(0.0, source)
+        # Model parameters
+        K          = initField(K0, nx, ny, nz, useCUDA, useOffset)
+        specificStorage = S0
 
-    # Recharge
-    recharge = Recharge(constRecharge, 0.0, rechargeFactor)
+        # Sources/sinks
+        source     = Source(i_src, j_src, k_src, duration, source, externals)
+        setSources!(0.0, source)
 
-    # Store the boundary conditions
-    if (useCUDA)
-        boundaryPressure = CuArray(boundaryPressure)
-    end
-    boundaryConditions = BoundaryConditions(boundaryPressure)
+        # Recharge
+        recharge = Recharge(constRecharge, 0.0, rechargeFactor)
+
+        # Store the boundary conditions
+        if (useCUDA)
+            boundaryPressure = CuArray(boundaryPressure)
+        end
+        boundaryConditions = BoundaryConditions(boundaryPressure)
 
 
-    # Group some parameters in the model.
-    # For now sources and boundary conditions
-    model      = Model(source, recharge, boundaryConditions)
+        # Group some parameters in the model.
+        # For now sources and boundary conditions
+        model      = Model(source, recharge, boundaryConditions)
 
-    # Initialize the set of parameters (for now only K)
-    parameters = Parameters(K, specificStorage)
+        # Initialize the set of parameters (for now only K)
+        parameters = Parameters(K, specificStorage)
 
-    # Input object is no longer needed
-    modelInput = nothing
+        # Input object is no longer needed
+        modelInput = nothing
 
-    # Time related data
-    maxsteps   = round(Int64, tend/Δt)
-    time       = 0.0
-    timeData  = TimeData(Δt, tend, time, maxsteps)
+        # Time related data
+        maxsteps   = round(Int64, tend/Δt)
+        time       = 0.0
+        timeData  = TimeData(Δt, tend, time, maxsteps)
 
-    # Solver data
-    Δh = initField(0.0, nx, ny, nz, useCUDA, useOffset)
-    solverData = SolverData(ΔhConv, Δh)
+        # Solver data
+        Δh = initField(0.0, nx, ny, nz, useCUDA, useOffset)
+        solverData = SolverData(ΔhConv, Δh)
 
-    return Simulation(grid, model, state, parameters, timeData, solverData)
+        return Simulation(grid, model, state, parameters, timeData, solverData)
+    end # end timer
 end

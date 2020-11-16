@@ -14,18 +14,13 @@ function groundwater3d(isBenchmark = false, useGPU = false)
         # Initialize the model
         println("Running 3D groundwater model:")
 
-        @timeit to "initialization" CUDA.@sync begin
-            defaultInput = getDefaultInput()
-            simulation = initSimulation(defaultInput, useGPU, to)
-        end
+        defaultInput = getDefaultInput()
+        simulation = initSimulation(defaultInput, useGPU, to)
 
-        @timeit to "run"  CUDA.@sync begin
-            runSimulation!(simulation, to)
-        end
+        runSimulation!(simulation, to)
 
-        @timeit to "plot result" CUDA.@sync begin
-            plotSimulation(simulation)
-        end
+        plotSimulation(simulation, to)
+
     end
 
     print_timer(to)

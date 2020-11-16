@@ -1,27 +1,32 @@
 using CUDA
 
+
+
 function runSimulation!(simulation, to::TimerOutput)
 
-    # Unpack time data
-    timeData = simulation.timeData
-    maxsteps = timeData.maxsteps
+    @synctimeit to "run simulation" begin
 
-    # Now start the time loop
-    println("Starting time loop ...")
+        # Unpack time data
+        timeData = simulation.timeData
+        maxsteps = timeData.maxsteps
 
-    for n = 1:maxsteps
+        # Now start the time loop
+        println("Starting time loop ...")
 
-        simulationConverged, Δh_max, max_index = doTimestep!(n, simulation, to::TimerOutput)
+        for n = 1:maxsteps
 
-        if simulationConverged
-            println()
-            println("-- simulation converged --")
-            println("Δh_max = ", Δh_max, " at ", max_index)
-            println("nr. of iters = ", n)
-            println()
-            break
+            simulationConverged, Δh_max, max_index = doTimestep!(n, simulation, to::TimerOutput)
+
+            if simulationConverged
+                println()
+                println("-- simulation converged --")
+                println("Δh_max = ", Δh_max, " at ", max_index)
+                println("nr. of iters = ", n)
+                println()
+                break
+            end
         end
-    end
+    end # end timer
 end
 
 function doTimestep!(n, simulation, to::TimerOutput)
@@ -40,44 +45,37 @@ function doTimestep!(n, simulation, to::TimerOutput)
     time        = timeData.time
 
     # Add the sources
-    #@timeit to "set rhs" CUDA.@sync begin
-    @timeit to "set rhs" begin
+    @synctimeit to "set rhs" begin
         setSources!(time, model.source)
         setRecharge!(time, model.recharge)
     end
 
-    #@timeit to "set_boundaries" CUDA.@sync begin
-        @timeit to "set_boundaries" begin
+    @synctimeit to "set_boundaries" begin
         bc = model.boundaryConditions
         setBoundaries!(grid, state, bc)
     end
 
-    #@timeit to "solve pressure" CUDA.@sync begin
-    @timeit to "solve pressure" begin
+    @synctimeit to "solve pressure" begin
         pressureEquation!(grid, model, state, parameters, timeData)
     end
 
-    #@timeit to "solve darcy" CUDA.@sync begin
-    @timeit to "solve darcy" begin
+    @synctimeit to "solve darcy" begin
         darcyEquation!(grid, model, state, parameters, timeData)
     end
 
     # check convergence
-    #@timeit to "convergence check" CUDA.@sync begin
-    @timeit to "convergence check" begin
+    @synctimeit to "convergence check" begin
         simulationConverged, Δh_max, max_index = checkConvergence!(state, solverData)
     end
 
-    #@timeit to "print iterations" CUDA.@sync begin
-    @timeit to "print iterations" begin
+    @synctimeit to "print iterations" begin
         if mod(n,100) == 0
             println("iter = ", n, ", Δh_max = ", Δh_max, " at ", max_index)
         end
     end
 
     # Update the old to the new solution
-    #@timeit to "update state" CUDA.@sync begin
-    @timeit to "update state" begin
+    @synctimeit to "update state" begin
         updateState!(state)
         time += Δt
     end

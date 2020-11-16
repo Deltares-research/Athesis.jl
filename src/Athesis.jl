@@ -1,5 +1,6 @@
 module Athesis
 
+include("athesis/utils.jl")
 include("athesis/initialize.jl")
 include("athesis/run.jl")
 include("athesis/equations.jl")
