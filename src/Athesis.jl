@@ -31,6 +31,10 @@ export
     Parameters,
     State,
     TimeData,
-    SolverData
+    SolverData,
+
+    # macros
+    @synctimeit,
+    @withCUDA
 
 end

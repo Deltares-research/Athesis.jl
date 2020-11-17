@@ -1,6 +1,8 @@
 using CUDA
 
-
+function runSimulation!(simulation)
+    runSimulation!(simulation, TimerOutput())
+end
 
 function runSimulation!(simulation, to::TimerOutput)
 
@@ -23,13 +25,20 @@ function runSimulation!(simulation, to::TimerOutput)
                 println("Δh_max = ", Δh_max, " at ", max_index)
                 println("nr. of iters = ", n)
                 println()
-                break
+
+                return true, n
             end
         end
+
+        return false, n
     end # end timer
 end
 
-function doTimestep!(n, simulation, to::TimerOutput)
+function doTimestep!(n, simulation)
+    doTimestep!(n, simulation, TimerOutput())
+end
+
+function doTimestep!(n, simulation, to)
 
     # Unpack data
     grid        = simulation.grid
