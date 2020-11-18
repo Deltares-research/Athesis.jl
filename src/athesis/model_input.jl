@@ -1,6 +1,6 @@
 # model_input.jl
 
-struct ModelInput{T}
+mutable struct ModelInput{T}
     nx::Int64
     ny::Int64
     nz::Int64
@@ -55,7 +55,6 @@ function getDefaultInput()
 
     # Time step (s)
     Δt = S0*(min(Δx,Δy,Δz))^2/(4.0*K0)
-    println("Δt (Courant-like) = ", Δt)
 
     # Initial condition
     h0   = 0.0     # (m)
@@ -84,27 +83,22 @@ function getDefaultInput()
     constRecharge = 5.0e-4 * Δx * Δy# / (24*3600.) # (m3/s)
     rechargeFactor = 1.0      # (-)
 
-    # Test model:
-    # 9 x 9 x 3: storage = 0.1x10-4
-    # dx = dy = 10 m, dz = variable
-    # recharge (N) of 5e-4
-    # tend = 1Y (1D)?, dt = large
-
     # Simulation end time (s)
     tend = 100000.0
 
     # Convergence criterion for steady state
     ΔhConv = 1e-8
 
-    # Set corresponding data type
-    # if useCUDA
-    #     data_type = CuArray
-    # else
-    #     data_type = Array
-    # end
-
     # Store the input in tuple "input"
-    println("Grid specified: 3D grid with\n nx = ", nx, ",\n ny = ", ny, ",\n nz = ", nz, " and\n Δx = ", Δx, ",\n Δy = ", Δy, ",\n Δz = ", Δz)
-    input = ModelInput(nx, ny, nz, Lx, Ly, Lz, Δx, Δy, Δz, Δt, tend, K0, S0, h0, u0, v0, w0, source, i_src, j_src, k_src, duration, ΔhConv, constRecharge, rechargeFactor, boundaryPressure)
+    input = ModelInput(nx, ny, nz,
+                        Lx, Ly, Lz,
+                        Δx, Δy, Δz,
+                        Δt, tend,
+                        K0, S0,
+                        h0, u0, v0, w0,
+                        source, i_src, j_src, k_src, duration,
+                        ΔhConv,
+                        constRecharge, rechargeFactor,
+                        boundaryPressure)
 
 end

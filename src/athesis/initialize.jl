@@ -30,13 +30,13 @@ function initModelState(grid, h0, u0, v0, w0, useCUDA)
     return state
 end
 
+function initSimulation(modelInput, useCUDA)
+    initSimulation(modelInput, useCUDA, TimerOutput())
+end
 
-function initSimulation(modelInput, useCUDA, to::TimerOutput)
+function initSimulation(modelInput, useCUDA, to)
 
     @synctimeit to "initialization" begin
-
-        println("Initialize the model ...")
-
         # Initialize the correct sizes/dimensions of the model
         nx        = modelInput.nx
         ny        = modelInput.ny
