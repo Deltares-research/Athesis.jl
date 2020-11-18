@@ -57,9 +57,9 @@ function plotTimerOutput(archs, dims, to::TimerOutput, modelName)
     @show SpeedUp = refTime./y
     p = plot!(x,SpeedUp, marker=:diamond, size=(800,800), xlabel="# of cells", ylabel="Time (s)", label="Architectural speed up", legend=(0.2, 0.9), grid=true)
 
-    display(p)
+    #display(p)
     figureTitle = "performance_plot_" * modelName * ".png"
-    savefig(p, figureTitle)
+    #savefig(p, figureTitle)
 
 
 end
