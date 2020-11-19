@@ -47,8 +47,8 @@ function getDefaultInput()
     Δy   = Ly/(ny+1)
     Δz   = Lz/(nz+1)
 
-    # hydraulic_conductivity (m/s)
-    K0   = 10.0
+    # hydraulic_conductivity (m/s, ~sand)
+    K0   = 10.0 / (24*3600)
 
     # specific storage (1/m)
     S0 = 0.0001
@@ -80,7 +80,7 @@ function getDefaultInput()
     # I is the unit rescharge flux (m/s)
     # A is the cell area for cell n
     # M is a multiplier/factor
-    constRecharge = 5.0e-4 * Δx * Δy# / (24*3600.) # (m3/s)
+    constRecharge = 5.0e-4 * Δx * Δy / (24*3600) # (m3/s)
     rechargeFactor = 1.0      # (-)
 
     # Simulation end time (s)
