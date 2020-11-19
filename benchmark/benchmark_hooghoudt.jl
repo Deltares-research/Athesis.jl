@@ -3,15 +3,17 @@ using Athesis
 
 using TimerOutputs
 
+include("../benchmark/benchmark_utils.jl")
+
 to = TimerOutput()
 
 archs = ["CPU"]
 @withCUDA archs = ["CPU", "GPU"]
 
-dims = [(16, 16, 16), (32, 32, 16), (64, 64, 16), (128, 128, 16)]
+dims = [(16, 16, 16), (32, 32, 16), (64, 64, 16), (128, 128, 16)] #, (256, 256, 16), (512, 512, 16)]
 
 for arch in archs
-    @synctimeit to "----" * arch * "----" begin
+    @synctimeit to arch begin
         for dim in dims
             input = getDefaultInput()
             input.nx = dim[1]
@@ -24,7 +26,7 @@ for arch in archs
             doTimestep!(1, preSim)
 
             # run timing
-            label = "Hooghoudt, " * string(dim) * ", " * arch
+            label = string(dim)
             @info "run benchmark: " * label
             @synctimeit to label begin
                 sim = initSimulation(input, arch == "GPU")
@@ -44,3 +46,6 @@ for arch in archs
 end
 
 print_timer(to)
+
+modelName = "Hooghoudt"
+plotTimerOutput(archs, dims, to, modelName)
