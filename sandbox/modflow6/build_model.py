@@ -3,10 +3,10 @@ import os
 import numpy as np
 
 model_dir = os.path.join(os.getcwd(),"data")
-model_name = 'cube'
+model_name = 'hooghoudt'
 
 # tdis
-nper = 10
+nper = 1
 tdis_rc = []
 for i in range(nper):
     tdis_rc.append((1., 1, 1))
@@ -15,35 +15,41 @@ for i in range(nper):
 nouter, ninner = 100, 300
 hclose, rclose, relax = 1e-9, 1e-3, 0.97
 
-# model spatial dimensions
-nlay, nrow, ncol = 1, 1000, 1000
+# model spatial discretization
+nlay, nrow, ncol = 1, 258, 258
+
+# dimenions
+Lx = 80.
+Ly = 80.
+Lz = 1.
 
 # cell spacing
-delr = 50.
-delc = 50.
+delr = Lx/(ncol-1)
+delc = Ly/(nrow-1)
 area = delr * delc
 
-# top of the aquifer
-top = 25.
-
-# bottom of the aquifer
-botm = 0.
+# top/bot of the aquifer
+top = 1.0
+tops = np.linspace(top, top-Lz, nlay+1)
 
 # hydraulic conductivity
-hk = 50.
+hk = 10.
 
 # boundary heads
-h1 = 20.
-h2 = 11.
+h1 = 1.
+h2 = 1.
+
+# initial
+hi = 0.
 
 # build chd stress period data
-left_bnd = [[(0,irow,0), h1] for irow in range(nrow)]
-right_bnd = [[(0,irow,ncol-1), h2] for irow in range(nrow)]
+left_bnd = [[(ilay,irow,0), h1] for ilay in range(nlay) for irow in range(nrow)]
+right_bnd = [[(ilay,irow,ncol-1), h2] for ilay in range(nlay) for irow in range(nrow)]
 bnd_data = left_bnd + right_bnd
 chd_spd = {0: bnd_data}
 
 # average recharge rate
-avg_rch = 0.001
+avg_rch = 5.0e-04
 
 # build recharge spd
 rch_spd = {}
@@ -75,14 +81,14 @@ gwf = flopy.mf6.ModflowGwf(sim, modelname=model_name, save_flows=True)
 
 dis = flopy.mf6.ModflowGwfdis(gwf, nlay=nlay, nrow=nrow, ncol=ncol,
                               delr=delr, delc=delc,
-                              top=top, botm=botm)
+                              top=tops[0], botm=tops[1:])
 
 # initial conditions
-ic = flopy.mf6.ModflowGwfic(gwf, strt=top)
+ic = flopy.mf6.ModflowGwfic(gwf, strt=hi)
 
 # node property flow
 npf = flopy.mf6.ModflowGwfnpf(gwf, save_flows=True,
-                              icelltype=1,
+                              icelltype=0,
                               k=hk)
 
 # chd file
@@ -98,7 +104,6 @@ oc = flopy.mf6.ModflowGwfoc(gwf,
                                 ('COLUMNS', 10, 'WIDTH', 15,
                                  'DIGITS', 6, 'GENERAL')],
                             saverecord=[('HEAD', 'ALL')],
-                            printrecord=[('HEAD', 'ALL'),
-                                         ('BUDGET', 'ALL')])
+                            printrecord=[('BUDGET', 'ALL')])
 
 sim.write_simulation()
