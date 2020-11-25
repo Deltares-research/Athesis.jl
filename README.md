@@ -1,9 +1,20 @@
 # Athesis.jl
 *a work in progress*
 
-Experimental portable water related numerical solver in Julia.
+Experimental portable numerical three-dimensional groundwater solver in Julia.
+Currently, the model runs on a structured rectangular grid.
+The user can specify whether simulations should be run:
+- on CPU or GPU
+- using single or double precision
 
-Some first code snippets can be found in src/sandbox/.
+The implentation contains two types of sources:
+- point sources
+- recharge (rainfall)
+
+Additionally, a number of simple boundary condition types have been implemented. This is still under construction.
+In the present imeplementation, an insaturated or partially-saturated zone is not yet considered.
+
+Additionally, some general code snippets can be found in src/sandbox/.
 
 - <b>diffusion2d_CPU_GPU</b> contains a 2d implementation of a simple diffusion solver, that can run both on CPU and GPU.
 - <b>multiple_dispatch</b> contains a 1d implementation of a computational kernel that employs multiple dispatch of the kernel (UPDATE) function
