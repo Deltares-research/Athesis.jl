@@ -5,7 +5,7 @@ using TimerOutputs
 
 using Athesis
 
-function groundwater3d(isBenchmark = false, useGPU = false)
+function groundwater3d(isBenchmark = false, useGPU = false, myFloat = Float64)
 
     to = TimerOutput()
 
@@ -15,7 +15,7 @@ function groundwater3d(isBenchmark = false, useGPU = false)
         println("Running 3D groundwater model:")
 
         defaultInput = getDefaultInput()
-        simulation = initSimulation(defaultInput, useGPU, to)
+        simulation = initSimulation(defaultInput, useGPU, myFloat, to)
 
         runSimulation!(simulation, to)
 

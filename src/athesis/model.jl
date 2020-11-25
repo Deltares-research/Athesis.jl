@@ -1,21 +1,23 @@
 abstract type Modeltype
 end
 
+# mutable struct myFloat <:AbstractFloat
+# end
 
-mutable struct Parameters{T}
-    K::T
-    specificStorage::AbstractFloat
+mutable struct Parameters{AT, FT}
+    K::AT
+    specificStorage::FT
     #Δt::Float64
 end
 
-mutable struct BoundaryConditions{T}
-    bcPressure::T
+mutable struct BoundaryConditions{AT}
+    bcPressure::AT
 end
 
-mutable struct Physics{T}
-    g::AbstractFloat
-    nuₕ::T
-    nuᵥ::T
+mutable struct Physics{AT, FT}
+    g::FT
+    nuₕ::AT
+    nuᵥ::AT
 end
 
 mutable struct ModelComponents
@@ -30,31 +32,31 @@ mutable struct ModelComponents
     sources::Bool
 end
 
-mutable struct State{T}
-    h::T
-    u::T
-    v::T
-    w::T
-    hⁿ⁺¹::T
-    uⁿ⁺¹::T
-    vⁿ⁺¹::T
-    wⁿ⁺¹::T
+mutable struct State{AT}
+    h::AT
+    u::AT
+    v::AT
+    w::AT
+    hⁿ⁺¹::AT
+    uⁿ⁺¹::AT
+    vⁿ⁺¹::AT
+    wⁿ⁺¹::AT
 end
 
-mutable struct Source{T}
+mutable struct Source{AT, FT}
     i_src::Int64
     j_src::Int64
     k_src::Int64
-    duration::AbstractFloat
-    discharge::AbstractFloat
-    externalSource::T
+    duration::FT
+    discharge::FT
+    externalSource::AT
 end
 
-mutable struct Recharge
+mutable struct Recharge{FT}
     #duration::AbstractFloat
-    constRecharge::AbstractFloat
-    rechargeFlux::AbstractFloat
-    rechargeFactor::AbstractFloat
+    constRecharge::FT
+    rechargeFlux::FT
+    rechargeFactor::FT
 end
 
 mutable struct Model
@@ -63,16 +65,16 @@ mutable struct Model
     boundaryConditions::BoundaryConditions
 end
 
-mutable struct TimeData
-    Δt::AbstractFloat
-    tend::AbstractFloat
-    time::AbstractFloat
+mutable struct TimeData{FT}
+    Δt::FT
+    tend::FT
+    time::FT
     maxsteps::Int64
 end
 
-mutable struct SolverData{T}
-    ΔhConv::AbstractFloat
-    Δh::T
+mutable struct SolverData{AT, FT}
+    ΔhConv::FT
+    Δh::AT
 end
 
 mutable struct Simulation

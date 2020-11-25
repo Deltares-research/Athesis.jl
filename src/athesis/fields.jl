@@ -7,8 +7,12 @@ using Adapt
 Adapt.adapt_structure(to, x::OffsetArray) = OffsetArray(adapt(to, parent(x)), x.offsets)
 
 
-function initField(inival, nx, ny, nz, useCUDA, useOffset)
+function initField(inival, nx, ny, nz, useCUDA, useOffset, myFloat)
     # Initialize a field/array
+
+    # Convert inival to correct Float type
+    inival = myFloat(inival)
+
     # If it is an offset array, increase size by 2
     if useOffset
         var = fill(inival, (nx+2, ny+2, nz+2))
@@ -35,8 +39,12 @@ end
 using CUDA
 using OffsetArrays
 
-function initField1D(inival, nx, useCUDA, useOffset)
+function initField1D(inival, nx, useCUDA, useOffset, myFloat)
     # Initialize a field/array
+
+    # Convert inival to correct Float type
+    inival = myFloat(inival)
+
     # If it is an offset array, increase size by 2
     if useOffset
         var = fill(inival, nx+2)
