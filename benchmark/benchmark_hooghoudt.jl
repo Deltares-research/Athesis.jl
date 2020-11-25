@@ -9,27 +9,28 @@ to = TimerOutput()
 
 archs = ["CPU"]
 @withCUDA archs = ["CPU", "GPU"]
+myFloat = Float32
 
-dims = [(16, 16, 16), (32, 32, 16), (64, 64, 16), (128, 128, 16)] #, (256, 256, 16), (512, 512, 16)]
+dims = [(16, 16, 16), (32, 32, 16), (64, 64, 16), (128, 128, 16), (256, 256, 16)] #, (512, 512, 16)]
 
 for arch in archs
     @synctimeit to arch begin
         for dim in dims
-            input = getDefaultInput()
+            input = getDefaultInput(myFloat)
             input.nx = dim[1]
             input.ny = dim[2]
             input.nz = dim[3]
 
             # enforce precompilation
             @info "starting precompilation..."
-            preSim = initSimulation(input, arch=="GPU")
+            preSim = initSimulation(input, arch=="GPU", myFloat)
             doTimestep!(1, preSim)
 
             # run timing
             label = string(dim)
             @info "run benchmark: " * label
             @synctimeit to label begin
-                sim = initSimulation(input, arch == "GPU")
+                sim = initSimulation(input, arch == "GPU", myFloat)
 
                 nmax = 200
                 for i in 1:nmax

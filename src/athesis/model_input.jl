@@ -1,36 +1,36 @@
 # model_input.jl
 
-mutable struct ModelInput{T}
+mutable struct ModelInput{AT, FT}
     nx::Int64
     ny::Int64
     nz::Int64
-    Lx::AbstractFloat
-    Ly::AbstractFloat
-    Lz::AbstractFloat
-    Δx::AbstractFloat
-    Δy::AbstractFloat
-    Δz::AbstractFloat
-    Δt::AbstractFloat
-    tend::AbstractFloat
-    K0::AbstractFloat
-    S0::AbstractFloat
-    h0::AbstractFloat
-    u0::AbstractFloat
-    v0::AbstractFloat
-    w0::AbstractFloat
-    source::AbstractFloat
+    Lx::FT
+    Ly::FT
+    Lz::FT
+    Δx::FT
+    Δy::FT
+    Δz::FT
+    Δt::FT
+    tend::FT
+    K0::FT
+    S0::FT
+    h0::FT
+    u0::FT
+    v0::FT
+    w0::FT
+    source::FT
     i_src::Int64
     j_src::Int64
     k_src::Int64
-    duration::AbstractFloat
-    ΔhConv::AbstractFloat
-    constRecharge::AbstractFloat
-    rechargeFactor::AbstractFloat
-    boundaryPressure::T
+    duration::FT
+    ΔhConv::FT
+    constRecharge::FT
+    rechargeFactor::FT
+    boundaryPressure::AT
 end
 
 # returns default model input
-function getDefaultInput()
+function getDefaultInput(myFloat)
 
     # Model size per dimension (-)
     nx   = 11
@@ -63,8 +63,8 @@ function getDefaultInput()
     w0   = 0.0     # (m/s)
 
     # Boundary conditions
-    hBCWest = 1.0
-    hBCEast = 1.0
+    hBCWest = myFloat(1.0)
+    hBCEast = myFloat(1.0)
     boundaryPressure = [hBCWest, hBCEast]
 
     # Source (well) data
@@ -90,15 +90,16 @@ function getDefaultInput()
     ΔhConv = 1e-8
 
     # Store the input in tuple "input"
-    input = ModelInput(nx, ny, nz,
-                        Lx, Ly, Lz,
-                        Δx, Δy, Δz,
-                        Δt, tend,
-                        K0, S0,
-                        h0, u0, v0, w0,
-                        source, i_src, j_src, k_src, duration,
-                        ΔhConv,
-                        constRecharge, rechargeFactor,
-                        boundaryPressure)
+    AT = typeof(boundaryPressure)
+    input = ModelInput{AT,myFloat}(nx, ny, nz,
+                                   Lx, Ly, Lz,
+                                   Δx, Δy, Δz,
+                                   Δt, tend,
+                                   K0, S0,
+                                   h0, u0, v0, w0,
+                                   source, i_src, j_src, k_src, duration,
+                                   ΔhConv,
+                                   constRecharge, rechargeFactor,
+                                   boundaryPressure)
 
 end

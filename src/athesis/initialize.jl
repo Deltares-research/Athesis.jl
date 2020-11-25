@@ -4,7 +4,7 @@ using CUDA
 using OffsetArrays
 using TimerOutputs
 
-function initModelState(grid, h0, u0, v0, w0, useCUDA)
+function initModelState(grid, h0, u0, v0, w0, useCUDA, myFloat)
     # Allocate model state
     # with 4 parameters
     # for now cell-centered,
@@ -16,25 +16,25 @@ function initModelState(grid, h0, u0, v0, w0, useCUDA)
     # Generate initial arrays with start index 0
     useOffset = true
 
-    h    = initField(h0, nx, ny, nz, useCUDA, useOffset)
-    u    = initField(u0, nx, ny, nz, useCUDA, useOffset)
-    v    = initField(v0, nx, ny, nz, useCUDA, useOffset)
-    w    = initField(w0, nx, ny, nz, useCUDA, useOffset)
+    h    = initField(h0, nx, ny, nz, useCUDA, useOffset, myFloat)
+    u    = initField(u0, nx, ny, nz, useCUDA, useOffset, myFloat)
+    v    = initField(v0, nx, ny, nz, useCUDA, useOffset, myFloat)
+    w    = initField(w0, nx, ny, nz, useCUDA, useOffset, myFloat)
 
-    hⁿ⁺¹ = initField(h0, nx, ny, nz, useCUDA, useOffset)
-    uⁿ⁺¹ = initField(u0, nx, ny, nz, useCUDA, useOffset)
-    vⁿ⁺¹ = initField(v0, nx, ny, nz, useCUDA, useOffset)
-    wⁿ⁺¹ = initField(w0, nx, ny, nz, useCUDA, useOffset)
+    hⁿ⁺¹ = initField(h0, nx, ny, nz, useCUDA, useOffset, myFloat)
+    uⁿ⁺¹ = initField(u0, nx, ny, nz, useCUDA, useOffset, myFloat)
+    vⁿ⁺¹ = initField(v0, nx, ny, nz, useCUDA, useOffset, myFloat)
+    wⁿ⁺¹ = initField(w0, nx, ny, nz, useCUDA, useOffset, myFloat)
 
     state = State(h, u, v, w, hⁿ⁺¹, uⁿ⁺¹, vⁿ⁺¹, wⁿ⁺¹)
     return state
 end
 
-function initSimulation(modelInput, useCUDA)
-    initSimulation(modelInput, useCUDA, TimerOutput())
+function initSimulation(modelInput, useCUDA, myFloat)
+    initSimulation(modelInput, useCUDA, myFloat, TimerOutput())
 end
 
-function initSimulation(modelInput, useCUDA, to)
+function initSimulation(modelInput, useCUDA, myFloat, to)
 
     @synctimeit to "initialization" begin
         # Initialize the correct sizes/dimensions of the model
@@ -66,25 +66,27 @@ function initSimulation(modelInput, useCUDA, to)
         noOffset  = false
 
         # The grid
-        x, y, z    = gridCoords(nx, ny, nz, Δx, Δy, Δz, useCUDA, useOffset)
-        grid       = Grid(nx, ny, nz, Δx, Δy, Δz, x, y, z)
+        x, y, z    = gridCoords(nx, ny, nz, Δx, Δy, Δz, useCUDA, useOffset, myFloat)
+        AT         = typeof(x)
+        grid       = Grid{AT,myFloat}(nx, ny, nz, Δx, Δy, Δz, x, y, z)
 
         # State vector
-        state      = initModelState(grid, h0, u0, v0, w0, useCUDA)
+        state      = initModelState(grid, h0, u0, v0, w0, useCUDA, myFloat)
 
         # External forcing
-        externals  = initField(0.0, nx, ny, nz, useCUDA, noOffset)
+        externals  = initField(0.0, nx, ny, nz, useCUDA, noOffset, myFloat)
 
         # Model parameters
-        K          = initField(K0, nx, ny, nz, useCUDA, useOffset)
+        K          = initField(K0, nx, ny, nz, useCUDA, useOffset, myFloat)
         specificStorage = S0
 
         # Sources/sinks
-        source     = Source(i_src, j_src, k_src, duration, source, externals)
+        AT = typeof(externals)
+        source     = Source{AT, myFloat}(i_src, j_src, k_src, duration, source, externals)
         setSources!(0.0, source)
 
         # Recharge
-        recharge = Recharge(constRecharge, 0.0, rechargeFactor)
+        recharge = Recharge{myFloat}(constRecharge, 0.0, rechargeFactor)
 
         # Store the boundary conditions
         if (useCUDA)
@@ -98,19 +100,21 @@ function initSimulation(modelInput, useCUDA, to)
         model      = Model(source, recharge, boundaryConditions)
 
         # Initialize the set of parameters (for now only K)
-        parameters = Parameters(K, specificStorage)
+        AT = typeof(K)
+        parameters = Parameters{AT,myFloat}(K, specificStorage)
 
         # Input object is no longer needed
         modelInput = nothing
 
         # Time related data
-        maxsteps   = round(Int64, tend/Δt)
-        time       = 0.0
+        maxsteps  = round(Int64, tend/Δt)
+        time      = myFloat(0.0)
         timeData  = TimeData(Δt, tend, time, maxsteps)
 
         # Solver data
-        Δh = initField(0.0, nx, ny, nz, useCUDA, useOffset)
-        solverData = SolverData(ΔhConv, Δh)
+        Δh = initField(0.0, nx, ny, nz, useCUDA, useOffset, myFloat)
+        AT = typeof(Δh)
+        solverData = SolverData{AT,myFloat}(ΔhConv, Δh)
 
         return Simulation(grid, model, state, parameters, timeData, solverData)
     end # end timer

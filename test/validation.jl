@@ -9,14 +9,15 @@ end
 function testBulge(useGPU)
     to = TimerOutput()
 
-    input = getDefaultInput()
+    myFloat = Float64
+    input = getDefaultInput(myFloat)
 
     # calculate bulging level from input parameters
     bulge = input.Lx * input.Lx * input.constRecharge /
     (8.0 * input.K0 * input.boundaryPressure[1] * input.Δx * input.Δy)
 
     useGPU = false
-    simulation = initSimulation(input, useGPU, to)
+    simulation = initSimulation(input, useGPU, myFloat, to)
     runSimulation!(simulation, to)
 
     ix = Int(ceil(simulation.grid.nx/2))
@@ -32,14 +33,15 @@ end
 function testBulgeGPUvsCPU()
 
     to = TimerOutput()
-    input = getDefaultInput()
+    myFloat = Float64
+    input = getDefaultInput(myFloat)
 
     # CPU
-    simulationCPU = initSimulation(input, false, to)
+    simulationCPU = initSimulation(input, false, myFloat, to)
     convergedCPU, nIterCPU = runSimulation!(simulationCPU, to)
 
     # GPU
-    simulationGPU = initSimulation(input, true, to)
+    simulationGPU = initSimulation(input, true, myFloat, to)
     convergedGPU, nIterGPU = runSimulation!(simulationGPU, to)
 
     # equal convergence
