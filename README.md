@@ -1,7 +1,7 @@
 # Athesis.jl
 *a work in progress*
 
-[![Binder](https://mybinder.org/badge_logo.svg)](https://mybinder.org/v2/gh/Deltares/Athesis.jl/HEAD?filepath=groundwater2d3d.jl)
+[![Binder](https://mybinder.org/badge_logo.svg)](https://mybinder.org/v2/gh/Deltares/Athesis.jl/HEAD?filepath=src/groundwater2d3d.jl)
 
 Experimental portable numerical three-dimensional groundwater solver in Julia.
 Currently, the model runs on a structured rectangular grid.
