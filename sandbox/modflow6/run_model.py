@@ -4,7 +4,7 @@ import matplotlib.pyplot as plt
 from xmipy import XmiWrapper
 
 
-
+with_plotting = False
 mf6_dll = "d:\checkouts\Athesis\sandbox\modflow6\lib\libmf6.dll"
 mf6_config_file = "d:\checkouts\Athesis\sandbox\modflow6\data\mfsim.nam"
 
@@ -19,12 +19,14 @@ mf6.initialize(mf6_config_file)
 mf6.update()
 
 # get head and reshape top layer for plotting
-head_tag = mf6.get_var_address("X", "HOOGHOUDT")
-head = mf6.get_value_ptr(head_tag)
 
-head_3d = head.reshape(1,258,258)
-plt.imshow(head_3d[0,:,:])
-plt.colorbar()
-plt.show()
+if with_plotting:
+    head_tag = mf6.get_var_address("X", "HOOGHOUDT")
+    head = mf6.get_value_ptr(head_tag)
+
+    head_3d = head.reshape(1,258,258)
+    plt.imshow(head_3d[0,:,:])
+    plt.colorbar()
+    plt.show()
 
 mf6.finalize()

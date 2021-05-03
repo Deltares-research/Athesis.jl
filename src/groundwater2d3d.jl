@@ -14,7 +14,7 @@ function groundwater3d(isBenchmark = false, useGPU = false, myFloat = Float64)
         # Initialize the model
         println("Running 3D groundwater model:")
 
-        defaultInput = getDefaultInput()
+        defaultInput = getDefaultInput(myFloat)
         simulation = initSimulation(defaultInput, useGPU, myFloat, to)
 
         runSimulation!(simulation, to)
