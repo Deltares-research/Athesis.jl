@@ -9,108 +9,30 @@ using CUDA
 # source     = (i_src, j_src, k_src, n_src, externals)
 
 
-function cudaWrapKernel!(kernel::Function,
-                         source,
-                         h, u, v, w,
-                         hⁿ⁺¹, uⁿ⁺¹, vⁿ⁺¹, wⁿ⁺¹,
-                         Δx, Δy, Δz,
-                         nx, ny, nz,
-                         Δt, K, SS)
+function launch!(grid, dims, kernel!, args...; dependencies=nothing)
 
-    # 3D implementation
-    ix = (blockIdx().x-1)*blockDim().x  + threadIdx().x
-    iy = (blockIdx().y-1)*blockDim().y  + threadIdx().y
-    iz = (blockIdx().z-1)*blockDim().z  + threadIdx().z
-    if (0 < ix < nx+1 && 0 < iy < ny+1 && 0 < iz < nz+1)
-        kernel(ix, iy, iz,
-               source,
-               h, u, v, w, hⁿ⁺¹, uⁿ⁺¹, vⁿ⁺¹, wⁿ⁺¹,
-               Δx, Δy, Δz, Δt, K, SS)
+    if dims == :xyz
+        workgroup = (8,8,4)
+        worksize = (grid.nx, grid.ny, grid.nz)
+    elseif dims == :xy
+        workgroup = (16,16)
+        worksize = (grid.nx, grid.ny)
+    elseif dims == :yz
+        workgroup = (16,16)
+        worksize = (grid.ny, grid.nz)
+    elseif dims == :xz
+        workgroup = (16,16)
+        worksize = (grid.nx, grid.nz)
+    else
+        throw(ArgumentError("Error launching kernel, dims: $dims"))
     end
 
-    return nothing
-end
 
 
-function gridloop!(kernel::Function,
-                   source::CuArray,
-                   state::State,
-                   grid::Grid,
-                   parameters::Parameters,
-                   timeData::TimeData)
-    # Grid loop on GPU for CUarrays (CUDA)
+    @debug "Launching kernel $kernel! with worksize $worksize"
 
-    # Unpack required variables
-    nx    = grid.nx
-    ny    = grid.ny
-    nz    = grid.nz
-    Δx    = grid.Δx
-    Δy    = grid.Δy
-    Δz    = grid.Δz
-    Δt    = timeData.Δt
-    h     = state.h
-    u     = state.u
-    v     = state.v
-    w     = state.w
-    hⁿ⁺¹  = state.hⁿ⁺¹
-    uⁿ⁺¹  = state.uⁿ⁺¹
-    vⁿ⁺¹  = state.vⁿ⁺¹
-    wⁿ⁺¹  = state.wⁿ⁺¹
-    K     = parameters.K
-    SS    = parameters.specificStorage
+    _kernel! = kernel!(device(grid.arch), workgroup, worksize)
+    event = _kernel!(args..., dependencies=dependencies)
 
-    ths = (8,8,4)
-    nbx = Int(ceil(grid.nx/ths[1]))
-    nby = Int(ceil(grid.ny/ths[2]))
-    nbz = Int(ceil(grid.nz/ths[3]))
-    bls = (nbx,nby,nbz)
-    @cuda threads=ths blocks=bls cudaWrapKernel!(
-                            kernel,
-                            source,
-                            h, u, v, w,
-                            hⁿ⁺¹, uⁿ⁺¹, vⁿ⁺¹, wⁿ⁺¹,
-                            Δx, Δy, Δz,
-                            nx, ny, nz, Δt,
-                            K, SS)
-end
-
-
-function gridloop!(kernel::Function,
-                   source::Array,
-                   state::State,
-                   grid::Grid,
-                   parameters::Parameters,
-                   timeData::TimeData)
-    # Grid loop for normal arrays on CPU
-
-    # Unpack required variables
-    nx    = grid.nx
-    ny    = grid.ny
-    nz    = grid.nz
-    Δx    = grid.Δx
-    Δy    = grid.Δy
-    Δz    = grid.Δz
-    Δt    = timeData.Δt
-    h     = state.h
-    u     = state.u
-    v     = state.v
-    w     = state.w
-    hⁿ⁺¹  = state.hⁿ⁺¹
-    uⁿ⁺¹  = state.uⁿ⁺¹
-    vⁿ⁺¹  = state.vⁿ⁺¹
-    wⁿ⁺¹  = state.wⁿ⁺¹
-    K     = parameters.K
-    SS    = parameters.specificStorage
-
-    for k = 1:nz
-        for j = 1:ny
-            for i = 1:nx
-                kernel(i, j, k,
-                       source,
-                       h, u, v, w,
-                       hⁿ⁺¹, uⁿ⁺¹, vⁿ⁺¹, wⁿ⁺¹,
-                       Δx, Δy, Δz, Δt, K, SS)
-            end
-        end
-    end
+    return event
 end

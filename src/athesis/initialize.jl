@@ -68,7 +68,7 @@ function initSimulation(modelInput, useCUDA, myFloat, to)
         # The grid
         x, y, z    = gridCoords(nx, ny, nz, Δx, Δy, Δz, useCUDA, useOffset, myFloat)
         AT         = typeof(x)
-        grid       = Grid{AT,myFloat}(nx, ny, nz, Δx, Δy, Δz, x, y, z)
+        grid       = Grid{AT,myFloat}(nx, ny, nz, Δx, Δy, Δz, x, y, z, useCUDA ? GPUArch() : CPUArch())
 
         # State vector
         state      = initModelState(grid, h0, u0, v0, w0, useCUDA, myFloat)

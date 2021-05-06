@@ -1,4 +1,4 @@
-# kernels_pressure_equation.jl
+using KernelAbstractions
 
 function averageK(K, i, j, k)
     Kw = harmonicMean(K[i-1,j  ,k  ],K[i  ,j  ,k  ])
@@ -14,17 +14,19 @@ function harmonicMean(v1, v2)
     return 2.0*v1*v2/(v1+v2)
 end
 
-########## Pressure kernels (CPU and GPU compatible)
+@kernel function pressureKernel!(source, h, hⁿ⁺¹, Δx, Δy, Δz, Δt, K, SS)
+    i, j, k = @index(Global, NTuple)
+    
+    @inbounds begin
+        F = K[i,j,k] * (
+            (h[i+1,j,k] + h[i-1,j,k] - 2.0*h[i,j,k])/(Δx*Δx) +
+            (h[i,j+1,k] + h[i,j-1,k] - 2.0*h[i,j,k])/(Δy*Δy) +
+            (h[i,j,k+1] + h[i,j,k-1] - 2.0*h[i,j,k])/(Δz*Δz)
+            ) + source[i,j,k]/(Δx*Δy)
 
-@inline function pressureKernel!(i, j, k, source, h, u, v, w, hⁿ⁺¹, uⁿ⁺¹, vⁿ⁺¹, wⁿ⁺¹, Δx, Δy, Δz, Δt, K, SS)
-    # for now cell centered
-    F = K[i,j,k] * (
-        (h[i+1,j,k] + h[i-1,j,k] - 2.0*h[i,j,k])/(Δx*Δx) +
-        (h[i,j+1,k] + h[i,j-1,k] - 2.0*h[i,j,k])/(Δy*Δy) +
-        (h[i,j,k+1] + h[i,j,k-1] - 2.0*h[i,j,k])/(Δz*Δz)
-        ) + source[i,j,k]/(Δx*Δy)
+        hⁿ⁺¹[i,j,k] = h[i,j,k] + Δt*F*(1.0/SS)
+    end
 
-    hⁿ⁺¹[i,j,k] = h[i,j,k] + Δt*F*(1.0/SS)
 end
 
 @inline function pressureKernelAveraged!(i, j, k, source, h, u, v, w, hⁿ⁺¹, uⁿ⁺¹, vⁿ⁺¹, wⁿ⁺¹, Δx, Δy, Δz, Δt, K, SS)

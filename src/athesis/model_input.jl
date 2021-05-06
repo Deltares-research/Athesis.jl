@@ -33,9 +33,9 @@ end
 function getDefaultInput(myFloat)
 
     # Model size per dimension (-)
-    nx   = 11
-    ny   = 11
-    nz   = 1
+    nx   = 100
+    ny   = 100
+    nz   = 2
 
     # Grid extent
     Lx = 80.0
@@ -87,7 +87,7 @@ function getDefaultInput(myFloat)
     tend = 100000.0
 
     # Convergence criterion for steady state
-    ΔhConv = 1e-8
+    ΔhConv = 1e-5
 
     # Store the input in tuple "input"
     AT = typeof(boundaryPressure)

@@ -15,22 +15,24 @@ function runSimulation!(simulation, to::TimerOutput)
         # Now start the time loop
         println("Starting time loop ...")
 
+        kiter = 0
         for n = 1:maxsteps
 
             simulationConverged, Δh_max, max_index = doTimestep!(n, simulation, to::TimerOutput)
+            kiter += 1
 
             if simulationConverged
                 println()
                 println("-- simulation converged --")
                 println("Δh_max = ", Δh_max, " at ", max_index)
-                println("nr. of iters = ", n)
+                println("nr. of iters = ", kiter)
                 println()
 
-                return true, n
+                return true, kiter
             end
         end
 
-        return false, n
+        return false, kiter
     end # end timer
 end
 
