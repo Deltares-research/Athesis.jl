@@ -3,10 +3,23 @@ using CUDA
 
 macro synctimeit(timer, label, body)
     if has_cuda()
-        return :( @timeit $(esc(timer)) $(esc(label)) CUDA.@sync $(esc(body)) )
+        return :( 
+            if ($(esc(timer)).enabled) 
+                @timeit $(esc(timer)) $(esc(label)) CUDA.@sync $(esc(body)) 
+            else
+                $(esc(body))
+            end
+            )
     else
-        return :( @timeit $(esc(timer)) $(esc(label)) $(esc(body)) )
+        return :( 
+            if ($(esc(timer)).enabled) 
+                @timeit $(esc(timer)) $(esc(label)) $(esc(body)) 
+            else
+                $(esc(body))
+            end
+            )
     end
+
 end
 
 macro withCUDA(expr)
