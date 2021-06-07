@@ -1,6 +1,16 @@
 # grids.jl
 
 using OffsetArrays
+using CUDA
+using KernelAbstractions
+using CUDAKernels
+
+abstract type AbstractArchitecture end
+struct CPUArch <: AbstractArchitecture end
+struct GPUArch <: AbstractArchitecture end
+
+device(::CPUArch) = KernelAbstractions.CPU()
+device(::GPUArch) = CUDAKernels.CUDADevice()
 
 mutable struct Grid{AT, FT}
     #grid_type::String
@@ -13,6 +23,7 @@ mutable struct Grid{AT, FT}
     x::AT
     y::AT
     z::AT
+    arch::AbstractArchitecture
 end
 
 function gridCoords(nx, ny, nz, Δx, Δy, Δz, useCUDA, useOffset, myFloat)

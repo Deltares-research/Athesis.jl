@@ -7,6 +7,9 @@ include("../benchmark/benchmark_utils.jl")
 
 to = TimerOutput()
 
+disabledTimer = TimerOutput()
+disable_timer!(disabledTimer)
+
 archs = ["CPU"]
 @withCUDA archs = ["CPU", "GPU"]
 myFloat = Float32
@@ -23,18 +26,18 @@ for arch in archs
 
             # enforce precompilation
             @info "starting precompilation..."
-            preSim = initSimulation(input, arch=="GPU", myFloat)
+            preSim = initSimulation(input, arch=="GPU", myFloat, disabledTimer)
             doTimestep!(1, preSim)
 
             # run timing
             label = string(dim)
             @info "run benchmark: " * label
             @synctimeit to label begin
-                sim = initSimulation(input, arch == "GPU", myFloat)
+                sim = initSimulation(input, arch == "GPU", myFloat, disabledTimer)
 
                 nmax = 200
                 for i in 1:nmax
-                    hasCvg, = doTimestep!(i, sim)
+                    hasCvg, = doTimestep!(i, sim, disabledTimer)
                     if hasCvg
                         break
                     end

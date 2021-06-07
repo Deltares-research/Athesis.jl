@@ -17,28 +17,59 @@
 
 function pressureEquation!(grid, model, state, parameters, timeData)
 
-    #println("   Solving the pressure equation ...")
-
-    # Unpack only source to be able to dispatch on type (Array or CuArray)
-    source   = model.source.externalSource
-
-    # Add the model recharge to top layer
-    source[:,:,grid.nz] .+= model.recharge.rechargeFlux
+    source = model.source.externalSource
+    rchFlux = model.recharge.rechargeFlux
 
     # Solve for the pressure/head
-    gridloop!(pressureKernel!, source, state, grid, parameters, timeData)
+    deps = Event(device(grid.arch))
+
+    toplayerNr = grid.nz
+    event1 = launch!(
+                    grid,               # grid
+                    :xy,                # coverage
+                    addToLayer!,        # kernel                    
+                    source,             # kernel args
+                    rchFlux,
+                    toplayerNr,
+                    dependencies=deps   # handle for sync.
+                    )
+                    
+    event2 = launch!(
+                    grid,                # grid
+                    :xyz,                # coverage
+                    pressureKernel!,  # kernel
+                    source,              # kernel args...
+                    state.h,
+                    state.hⁿ⁺¹,
+                    grid.Δx, 
+                    grid.Δy, 
+                    grid.Δz, 
+                    timeData.Δt, 
+                    parameters.K,
+                    parameters.specificStorage, 
+                    dependencies=event1  # handle for sync.
+                    )
+
+    wait(device(grid.arch), event2)
+
 end
 
-
-
 function darcyEquation!(grid, model, state, parameters, timeData)
-
     # Compute the velocities from the darcy equation using the pressure
-    # For now cell-centered and collocated
-    #println("   Solving the Darcy equation ...")
-
-    # Unpack only source to be able to dispatch on type (Array or CuArray)
-    source = model.source.externalSource
-
-    gridloop!(darcyKernel!, source, state, grid, parameters, timeData)
+    deps = Event(device(grid.arch))
+    event = launch!(
+                    grid,                # grid
+                    :xyz,                # coverage
+                    darcyKernel!,     # kernel
+                    state.uⁿ⁺¹,          # kernel args...
+                    state.vⁿ⁺¹,
+                    state.wⁿ⁺¹,
+                    state.h,
+                    grid.Δx, 
+                    grid.Δy, 
+                    grid.Δz, 
+                    parameters.K,
+                    dependencies=deps # event handle for sync.
+                    )
+    wait(device(grid.arch), event)
 end

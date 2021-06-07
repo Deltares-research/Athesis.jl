@@ -13,6 +13,7 @@ include("athesis/boundary_conditions.jl")
 include("athesis/gridloop.jl")
 include("athesis/kernels_pressure_equation.jl")
 include("athesis/kernels_darcy_equation.jl")
+include("athesis/kernels.jl")
 include("athesis/operators.jl")
 include("athesis/fields.jl")
 
