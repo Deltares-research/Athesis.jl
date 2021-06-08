@@ -12,16 +12,16 @@ using CUDA
 function launch!(grid, dims, kernel!, args...; dependencies=nothing)
 
     if dims == :xyz
-        workgroup = (8,8,4)
+        workgroup = (8, 8, 4)
         worksize = (grid.nx, grid.ny, grid.nz)
     elseif dims == :xy
-        workgroup = (16,16)
+        workgroup = (16, 16)
         worksize = (grid.nx, grid.ny)
     elseif dims == :yz
-        workgroup = (16,16)
+        workgroup = (16, 16)
         worksize = (grid.ny, grid.nz)
     elseif dims == :xz
-        workgroup = (16,16)
+        workgroup = (16, 16)
         worksize = (grid.nx, grid.nz)
     else
         throw(ArgumentError("Error launching kernel, dims: $dims"))

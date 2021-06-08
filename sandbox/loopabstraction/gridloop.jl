@@ -27,7 +27,7 @@ function run()
 
     # first separate kernels:
     fill!(result, 0.0)
-    @timeit to "separate "*backendname(useCUDA) begin
+    @timeit to "separate " * backendname(useCUDA) begin
     gridloop(result, kernel_multby2, fieldA)
     gridloop(result, kernel_mean, (fieldA, fieldB))
     end
@@ -35,29 +35,29 @@ function run()
 
     # then merged into one:
     fill!(result, 0.0)
-    @timeit to "fused "*backendname(useCUDA) begin
+    @timeit to "fused " * backendname(useCUDA) begin
     gridloop(result, kernel_fused, (fieldA, fieldB))
     end
     println("result fused:  ", result[1:10])
 
     # then composed:
     fill!(result, 0.0)
-    @timeit to "composed "*backendname(useCUDA) begin
+    @timeit to "composed " * backendname(useCUDA) begin
     gridloop(result, kernel_composed, (fieldA, fieldB))
     end
     println("result composed:  ", result[1:10])
 
     # as a nested loop...:
     fill!(result, 0.0)
-    @timeit to "nested "*backendname(useCUDA) begin
-    gridloop_nested(result, (kernel_multby2,kernel_mean), ((fieldA),(fieldA, fieldB)))
+    @timeit to "nested " * backendname(useCUDA) begin
+    gridloop_nested(result, (kernel_multby2, kernel_mean), ((fieldA), (fieldA, fieldB)))
     end
     println("result nested:  ", result[1:10])
 
     # nested, with syncing:
     fill!(result, 0.0)
-    @timeit to "nested (synced) "*backendname(useCUDA) CuArrays.@sync begin
-    gridloop_nested(result, (kernel_multby2,kernel_mean), ((fieldA),(fieldA, fieldB)))
+    @timeit to "nested (synced) " * backendname(useCUDA) CuArrays.@sync begin
+    gridloop_nested(result, (kernel_multby2, kernel_mean), ((fieldA), (fieldA, fieldB)))
     end
     println("result nested (synced):  ", result[1:10])
 
@@ -75,7 +75,7 @@ end
 end
 
 @inline function kernel_fused(i, result, (ξ, ψ))
-    @inbounds result[i] += 2*ξ[i] + 0.5*(ξ[i] + ψ[i])
+    @inbounds result[i] += 2 * ξ[i] + 0.5 * (ξ[i] + ψ[i])
 end
 
 @inline function kernel_composed(i, result, (ξ, ψ))
@@ -84,7 +84,7 @@ end
 end
 
 function cuda_wrap_kernel(result, kernel, input)
-    ix = (blockIdx().x-1)*blockDim().x  + threadIdx().x
+    ix = (blockIdx().x - 1) * blockDim().x  + threadIdx().x
     if (ix <= length(result))
         kernel(ix, result, input)
     end
@@ -95,18 +95,18 @@ end
 function gridloop(result::CuArray, kernel, input)
     ths = 256
     bls = Int(ceil(length(result) / ths))
-    @cuda threads=ths blocks=bls cuda_wrap_kernel(result, kernel, input)
+    @cuda threads = ths blocks = bls cuda_wrap_kernel(result, kernel, input)
 end
 
 function gridloop(result, kernel, input)
-    for i = 1 : length(result)
+    for i = 1:length(result)
         kernel(i, result, input)
     end
 end
 
 @unroll function gridloop_nested(result, kernels, args)
-    for i = 1 : length(result)
-        @unroll for k = 1 : length(kernels)
+    for i = 1:length(result)
+        @unroll for k = 1:length(kernels)
             kernels[k](i, result, args[k])
         end
     end
@@ -115,7 +115,7 @@ end
 function gridloop_nested(result::CuArray, kernels, args)
     ths = 256
     bls = Int(ceil(length(result) / ths))
-    for k = 1 : length(kernels)
-        @cuda threads=ths blocks=bls cuda_wrap_kernel(result, kernels[k], args[k])
+    for k = 1:length(kernels)
+        @cuda threads = ths blocks = bls cuda_wrap_kernel(result, kernels[k], args[k])
     end
 end

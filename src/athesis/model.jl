@@ -4,28 +4,28 @@ end
 # mutable struct myFloat <:AbstractFloat
 # end
 
-mutable struct Parameters{AT, FT}
+mutable struct Parameters{AT,FT}
     K::AT
     specificStorage::FT
-    #Δt::Float64
+    # Δt::Float64
 end
 
 mutable struct BoundaryConditions{AT}
     bcPressure::AT
 end
 
-mutable struct Physics{AT, FT}
+mutable struct Physics{AT,FT}
     g::FT
     nuₕ::AT
     nuᵥ::AT
 end
 
 mutable struct ModelComponents
-    #advection::Bool
-    #diffusion::Bool
-    #bottom_friction::Bool
-    #wind_friction::Bool
-    #gravity::Bool
+    # advection::Bool
+    # diffusion::Bool
+    # bottom_friction::Bool
+    # wind_friction::Bool
+    # gravity::Bool
     hydraulicConductivity::Bool
     massFlux::Bool
     pressure::Bool
@@ -43,7 +43,7 @@ mutable struct State{AT}
     wⁿ⁺¹::AT
 end
 
-mutable struct Source{AT, FT}
+mutable struct Source{AT,FT}
     i_src::Int64
     j_src::Int64
     k_src::Int64
@@ -53,7 +53,7 @@ mutable struct Source{AT, FT}
 end
 
 mutable struct Recharge{FT}
-    #duration::AbstractFloat
+    # duration::AbstractFloat
     constRecharge::FT
     rechargeFlux::FT
     rechargeFactor::FT
@@ -72,7 +72,7 @@ mutable struct TimeData{FT}
     maxsteps::Int64
 end
 
-mutable struct SolverData{AT, FT}
+mutable struct SolverData{AT,FT}
     ΔhConv::FT
     Δh::AT
 end

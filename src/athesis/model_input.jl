@@ -1,6 +1,6 @@
 # model_input.jl
 
-mutable struct ModelInput{AT, FT}
+mutable struct ModelInput{AT,FT}
     nx::Int64
     ny::Int64
     nz::Int64
@@ -29,7 +29,7 @@ mutable struct ModelInput{AT, FT}
     boundaryPressure::AT
 end
 
-# returns default model input
+"""Returns default model input"""
 function getDefaultInput(myFloat)
 
     # Model size per dimension (-)
@@ -43,18 +43,18 @@ function getDefaultInput(myFloat)
     Lz = 10.0
 
     # Grid sizes (m)
-    Δx   = Lx/(nx+1)
-    Δy   = Ly/(ny+1)
-    Δz   = Lz/(nz+1)
+    Δx   = Lx / (nx + 1)
+    Δy   = Ly / (ny + 1)
+    Δz   = Lz / (nz + 1)
 
     # hydraulic_conductivity (m/s, ~sand)
-    K0   = 10.0 / (24*3600)
+    K0   = 10.0 / (24 * 3600)
 
     # specific storage (1/m)
     S0 = 0.0001
 
     # Time step (s)
-    Δt = S0*(min(Δx,Δy,Δz))^2/(4.0*K0)
+    Δt = S0 * (min(Δx, Δy, Δz))^2 / (4.0 * K0)
 
     # Initial condition
     h0   = 0.0     # (m)
@@ -80,7 +80,7 @@ function getDefaultInput(myFloat)
     # I is the unit rescharge flux (m/s)
     # A is the cell area for cell n
     # M is a multiplier/factor
-    constRecharge = 5.0e-4 * Δx * Δy / (24*3600) # (m3/s)
+    constRecharge = 5.0e-4 * Δx * Δy / (24 * 3600) # (m3/s)
     rechargeFactor = 1.0      # (-)
 
     # Simulation end time (s)

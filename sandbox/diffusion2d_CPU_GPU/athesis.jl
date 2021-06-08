@@ -1,8 +1,8 @@
-#'''
+# '''
 # Athesis.jl
 # A Thramework for Efficient Simulations in Software
 # A flexible and portable toolbox for scientific computing on CPUs and GPUs
-#'''
+# '''
 
 using Test
 using CuArrays
@@ -10,10 +10,10 @@ using CUDAdrv, CUDAnative
 
 include("reduce.jl")
 
-#######################################################
-# Get model input:                                    #
-# grid, model type, physcial and numerical parameters #
-#######################################################
+"""
+Get model input:                                    
+grid, model type, physcial and numerical parameters 
+"""
 function model_input(GPU)
     model_data = []
     grid_data  = []
@@ -49,19 +49,19 @@ function model_input(GPU)
     C = 0.98
 
     # time step size
-    maxdx = max(dx,dy)
-    dx2   = maxdx*maxdx
-    dt    = C*0.5*dx2/K
+    maxdx = max(dx, dy)
+    dx2   = maxdx * maxdx
+    dt    = C * 0.5 * dx2 / K
 
     # Maximum number of time steps
     maxsteps = 10000
 
     # Initialize hydraulic head
-    h0 = 15.0*ones(Float64, nx, ny)
+    h0 = 15.0 * ones(Float64, nx, ny)
 
     # boundary conditions
-    bcleft = 10.0*ones(Float64, nx)
-    bcright = 20.0*ones(Float64, nx)
+    bcleft = 10.0 * ones(Float64, nx)
+    bcright = 20.0 * ones(Float64, nx)
 
     # solver parameters
     conv_limit = 1.0e-06
@@ -70,19 +70,18 @@ function model_input(GPU)
     time_integration = "forward_euler"
 
     # Hardware/computing information
-    #GPU = false
+    # GPU = false
 
-    grid_data  = Dict("x0"=>x0, "y0"=>y0, "nx"=>nx, "ny"=>ny, "dx"=>dx, "dy"=>dy)
-    model_data = Dict("advection"=>advection, "diffusion"=>diffusion, "friction"=>friction, "h0"=>h0, "bcleft"=>bcleft, "bcright"=>bcright)
-    time_data  = Dict("dt"=>dt, "maxsteps"=>maxsteps, "Courant"=>C, "time_integration"=>time_integration)
-    parameters = Dict("K"=>K, "conv_limit"=>conv_limit, "GPU"=>GPU)
+    grid_data  = Dict("x0" => x0, "y0" => y0, "nx" => nx, "ny" => ny, "dx" => dx, "dy" => dy)
+    model_data = Dict("advection" => advection, "diffusion" => diffusion, "friction" => friction, "h0" => h0, "bcleft" => bcleft, "bcright" => bcright)
+    time_data  = Dict("dt" => dt, "maxsteps" => maxsteps, "Courant" => C, "time_integration" => time_integration)
+    parameters = Dict("K" => K, "conv_limit" => conv_limit, "GPU" => GPU)
 
     return model_data, grid_data, time_data, parameters, err
 end
 
-#############################################
-# Setup the grid: structured / unstructured #
-#############################################
+
+"""Setup the grid: structured / unstructured"""
 function grid_setup(grid_data)
 
     println("Setting up the grid ...")
@@ -100,21 +99,21 @@ function grid_setup(grid_data)
     yc = zeros(Float64, nx, ny)
     for j = 1:ny
         for i = 1:nx
-            xc[i,j] = x0 + (i-0.5)*dx
-            yc[i,j] = y0 + (j-0.5)*dy
+            xc[i,j] = x0 + (i - 0.5) * dx
+            yc[i,j] = y0 + (j - 0.5) * dy
         end
     end
 
-    grid = Dict("nx"=>nx, "ny"=>ny, "dx"=>dx, "dy"=>dy, "xc"=>xc,"yc"=>yc)
+    grid = Dict("nx" => nx, "ny" => ny, "dx" => dx, "dy" => dy, "xc" => xc, "yc" => yc)
 
     return grid, err
 end
 
 
-#####################################################
-# Setup the model:                                  #
-# discretization in space and time, initializations #
-#####################################################
+"""
+Setup the model:                                  
+discretization in space and time, initializations 
+"""
 function model_setup(model_data, time_data, grid, parameters)
 
     println("Setting up the model ...")
@@ -135,15 +134,15 @@ function model_setup(model_data, time_data, grid, parameters)
     dt               = time_data["dt"]
     maxsteps         = time_data["maxsteps"]
     C                = time_data["Courant"]
-    #time_integration = time_data["time_integration"]
+    # time_integration = time_data["time_integration"]
 
     conv_limit = parameters["conv_limit"]
     GPU        = parameters["GPU"]
 
     nx = grid["nx"]
     ny = grid["ny"]
-    #dx = grid["dx"]
-    #dy = grid["dy"]
+    # dx = grid["dx"]
+    # dy = grid["dy"]
 
     # Set initial h
     h = h0
@@ -153,20 +152,20 @@ function model_setup(model_data, time_data, grid, parameters)
         # copy to GPU
         h = CuArray(h)
         hnew = copy(h)
-        hchange = 2.0*conv_limit*CuArrays.ones(eltype(h), nx*ny)
+        hchange = 2.0 * conv_limit * CuArrays.ones(eltype(h), nx * ny)
         state = [h, hnew, hchange]
 
         # GPU stuff
-        ths = (16,16)
-        bls = (Int(ceil(nx/ths[1])),Int(ceil(ny/ths[2])))
+        ths = (16, 16)
+        bls = (Int(ceil(nx / ths[1])), Int(ceil(ny / ths[2])))
         pars  = [ths, bls]
     else
         hnew = copy(h)
-        hchange = 2.0*conv_limit*ones(eltype(h), nx*ny)
+        hchange = 2.0 * conv_limit * ones(eltype(h), nx * ny)
     end
 
     state = [h, hnew, hchange]
-    model = Dict("state"=>state, "bcs"=>bcs)
+    model = Dict("state" => state, "bcs" => bcs)
 
     # For now the simple diffusion model, with forward euler (explicit) time integration
     # TO DO
@@ -174,26 +173,26 @@ function model_setup(model_data, time_data, grid, parameters)
     return model, pars, err
 end
 
-# kernel for change in 2D, result in u
+"""Kernel for change in 2D, result in u"""
 function calculateChange_gpu!(u::AbstractArray, v::AbstractArray, w::AbstractArray)
     ix = blockDim().x * (blockIdx().x - 1) + threadIdx().x;
     iy = blockDim().y * (blockIdx().y - 1) + threadIdx().y;
-    idx = size(u,1)*(iy-1) + ix
-    if ix < size(u,1) + 1 && iy < size(u,2) + 1
+    idx = size(u, 1) * (iy - 1) + ix
+    if ix < size(u, 1) + 1 && iy < size(u, 2) + 1
         @inbounds w[idx] = abs(v[ix,iy] - u[ix,iy])
     end
 
     return nothing
 end
 
-# kernel for diffusion in 2D
+"""Kernel for diffusion in 2D"""
 function calculateDiffusion_gpu!(unew::AbstractArray, u::AbstractArray, dx, dy, dt, K)
     ix = blockDim().x * (blockIdx().x - 1) + threadIdx().x;
     iy = blockDim().y * (blockIdx().y - 1) + threadIdx().y;
 
-    if ix > 1 && iy > 1 && ix < size(unew,1) && iy < size(unew,2)
-        @inbounds F = K * ( (u[ix+1,iy] + u[ix-1,iy] - 2.0*u[ix,iy])/(dx*dx) + (u[ix,iy+1]+u[ix,iy-1] - 2.0*u[ix,iy])/(dy*dy) )
-        @inbounds unew[ix,iy] = u[ix,iy] + dt*F
+    if ix > 1 && iy > 1 && ix < size(unew, 1) && iy < size(unew, 2)
+        @inbounds F = K * ( (u[ix + 1,iy] + u[ix - 1,iy] - 2.0 * u[ix,iy]) / (dx * dx) + (u[ix,iy + 1] + u[ix,iy - 1] - 2.0 * u[ix,iy]) / (dy * dy) )
+        @inbounds unew[ix,iy] = u[ix,iy] + dt * F
     end
 
     return nothing
@@ -222,21 +221,20 @@ function update_boundary_conditions!(model)
     return model, err
 end
 
-#############################################
-# Time loop: integrate the solution in time #
-#############################################
+
+"""Time loop: integrate the solution in time"""
 function timeloop!(model, pars, grid, time_data, parameters)
 
     println("Starting time loop ...")
-    #solution = []
+    # solution = []
     err      = ' '
 
     dt       = time_data["dt"]
     maxsteps = time_data["maxsteps"]
-    #state    = model["state"]
+    # state    = model["state"]
     GPU      = parameters["GPU"]
 
-    #niter = 0
+    # niter = 0
     conv = false
 
     for n = 1:maxsteps
@@ -251,16 +249,14 @@ function timeloop!(model, pars, grid, time_data, parameters)
         end
     end
 
-    #println("convergence in ", niter, " iterations (", maxchange, ")")
-    #display(hnew)
+    # println("convergence in ", niter, " iterations (", maxchange, ")")
+    # display(hnew)
     display(model["state"][2])
 
     return model, err
 end
 
-#########################################
-# Perform a single time step on the GPU #
-#########################################
+"""Perform a single time step on the GPU"""
 function single_timestep_GPU!(niter, dt, model, pars, grid, parameters, conv)
     err = ' '
     maxchange = 0.0
@@ -283,14 +279,14 @@ function single_timestep_GPU!(niter, dt, model, pars, grid, parameters, conv)
     # Unpack grid
     dx = grid["dx"]
     dy = grid["dy"]
-    #nx = grid["nx"]
-    #ny = grid["ny"]
+    # nx = grid["nx"]
+    # ny = grid["ny"]
 
-    #niter = niter + 1
+    # niter = niter + 1
 
     # run CUDA kernels
-    @cuda threads=ths blocks=bls calculateDiffusion_gpu!(hnew, h, dx, dy, dt, K)
-    @cuda threads=ths blocks=bls calculateChange_gpu!(h, hnew, hchange)
+    @cuda threads = ths blocks = bls calculateDiffusion_gpu!(hnew, h, dx, dy, dt, K)
+    @cuda threads = ths blocks = bls calculateChange_gpu!(h, hnew, hchange)
 
     # reduce to find maximum change in h
     gpu_reduce(max, hchange, hchange)
@@ -298,7 +294,7 @@ function single_timestep_GPU!(niter, dt, model, pars, grid, parameters, conv)
 
     # set no-flow boundaries
     hnew[1,:] = hnew[2,:]
-    hnew[end,:] = hnew[end-1,:]
+    hnew[end,:] = hnew[end - 1,:]
 
     # swap
     htemp = hnew
@@ -310,9 +306,9 @@ function single_timestep_GPU!(niter, dt, model, pars, grid, parameters, conv)
     if maxchange < conv_limit
         conv = true
     end
-    #maxchange = 0.0
+    # maxchange = 0.0
 
-    if (mod(niter,10) == 0)
+    if (mod(niter, 10) == 0)
         println("iteration: ", niter, ". Maximum change: ", maxchange)
     end
     model["state"] = state
@@ -320,9 +316,7 @@ function single_timestep_GPU!(niter, dt, model, pars, grid, parameters, conv)
     return model, conv, err
 end
 
-##############################
-# Perform a single time step #
-##############################
+"""Perform a single time step"""
 function single_timestep!(niter, dt, model, grid, parameters, conv)
     err = ' '
     maxchange = 0.0
@@ -342,15 +336,15 @@ function single_timestep!(niter, dt, model, grid, parameters, conv)
     dy = grid["dy"]
     nx = grid["nx"]
     ny = grid["ny"]
-    #niter = niter + 1
+    # niter = niter + 1
 
     # Compute the spatial operator
-    for j=2:ny-1
-        for i=2:nx-1
-            @inbounds F = K * ( (h[i+1,j] + h[i-1,j] - 2.0*h[i,j])/(dx*dx) + (h[i,j+1]+h[i,j-1] - 2.0*h[i,j])/(dy*dy) )
-            @inbounds hnew[i,j] = h[i,j] + dt*F
+    for j = 2:ny - 1
+        for i = 2:nx - 1
+            @inbounds F = K * ( (h[i + 1,j] + h[i - 1,j] - 2.0 * h[i,j]) / (dx * dx) + (h[i,j + 1] + h[i,j - 1] - 2.0 * h[i,j]) / (dy * dy) )
+            @inbounds hnew[i,j] = h[i,j] + dt * F
 
-            change = abs(h[i,j]-hnew[i,j])
+            change = abs(h[i,j] - hnew[i,j])
             # replace by max(..)?
             if change > maxchange
                 maxchange = change
@@ -360,7 +354,7 @@ function single_timestep!(niter, dt, model, grid, parameters, conv)
 
     # set no-flow boundaries
     hnew[1,:] = hnew[2,:]
-    hnew[end,:] = hnew[end-1,:]
+    hnew[end,:] = hnew[end - 1,:]
 
     # swap
     htemp = hnew
@@ -372,19 +366,17 @@ function single_timestep!(niter, dt, model, grid, parameters, conv)
     if maxchange < conv_limit
         conv = true
     end
-    #maxchange = 0.0
-    if (mod(niter,10) == 0)
+    # maxchange = 0.0
+    if (mod(niter, 10) == 0)
         println("iteration: ", niter, ". Maximum change: ", maxchange)
     end
 
-    #solution = state
+    # solution = state
 
     return model, conv, err
 end
 
-########################
-# Finalize the program #
-########################
+"""Finalize the program"""
 function finalization!(model, grid)
 
     println("Finalizing model ...")
@@ -395,9 +387,7 @@ function finalization!(model, grid)
     return err
 end
 
-###########################################################
-###                       Main program                  ###
-###########################################################
+"""Main program"""
 function athesis(; GPU::Bool=false)
 
     println("Running Athesis ...")

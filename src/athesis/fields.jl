@@ -15,7 +15,7 @@ function initField(inival, nx, ny, nz, useCUDA, useOffset, myFloat)
 
     # If it is an offset array, increase size by 2
     if useOffset
-        var = fill(inival, (nx+2, ny+2, nz+2))
+        var = fill(inival, (nx + 2, ny + 2, nz + 2))
     else
         var = fill(inival, (nx, ny, nz))
     end
@@ -28,7 +28,7 @@ function initField(inival, nx, ny, nz, useCUDA, useOffset, myFloat)
 
     # When offset array, shift start index to 0
     if useOffset
-        var = OffsetArray(var, (0:nx+1, 0:ny+1, 0:nz+1))
+        var = OffsetArray(var, (0:nx + 1, 0:ny + 1, 0:nz + 1))
     end
 
     return var
@@ -47,7 +47,7 @@ function initField1D(inival, nx, useCUDA, useOffset, myFloat)
 
     # If it is an offset array, increase size by 2
     if useOffset
-        var = fill(inival, nx+2)
+        var = fill(inival, nx + 2)
     else
         var = fill(inival, nx)
     end
@@ -60,7 +60,7 @@ function initField1D(inival, nx, useCUDA, useOffset, myFloat)
 
     # When offset array, shift start index to 0
     if useOffset
-        var = OffsetArray(var, 0:nx+1)
+        var = OffsetArray(var, 0:nx + 1)
     end
 
     return var

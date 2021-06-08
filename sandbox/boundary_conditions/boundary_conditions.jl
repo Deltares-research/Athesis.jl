@@ -21,12 +21,12 @@ mutable struct BCLocation{T}
 end
 
 mutable struct BCValues{T}
-    N::Int64
+N::Int64
     dim::Int64
     values::T
  end
 
-mutable struct BoundaryCondition{string,BCType,BCParameter,BCLocation, BCValues}
+mutable struct BoundaryCondition{string,BCType,BCParameter,BCLocation,BCValues}
     name::string
     type::BCType
     parameter::BCParameter
@@ -48,8 +48,8 @@ water_level_bc = WaterLevelBC()
 velocity_bc    = VelocityBC()
 flux_bc        = FluxBC()
 
-bc_cells  = OffsetArray{Int64}(undef, 0:nx+1,0:ny+1,0:nz+1)
-bc_values = OffsetArray{Float64}(undef, 0:nx+1,0:ny+1,0:nz+1)
+bc_cells  = OffsetArray{Int64}(undef, 0:nx + 1, 0:ny + 1, 0:nz + 1)
+bc_values = OffsetArray{Float64}(undef, 0:nx + 1, 0:ny + 1, 0:nz + 1)
 
 bc_cells .= 0
 bc_cells .= 0.0

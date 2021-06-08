@@ -4,18 +4,15 @@
 # Fast parallel reduction for Kepler hardware
 # - uses shuffle and shared memory to reduce efficiently
 # - support for large arrays
-#
+# 
 # Based on devblogs.nvidia.com/parallelforall/faster-parallel-reductions-kepler/
 
 using CUDAdrv, CUDAnative, CuArrays
 
 
-#
-# Main implementation
-#
 
-# Reduce a value across a warp
-@inline function reduce_warp(op::F, val::T)::T where {F<:Function,T}
+"""Reduce a value across a warp"""
+@inline function reduce_warp(op::F, val::T)::T where {F <: Function,T}
     offset = CUDAnative.warpsize() ÷ 2
     # TODO: this can be unrolled if warpsize is known...
     while offset > 0
@@ -25,8 +22,8 @@ using CUDAdrv, CUDAnative, CuArrays
     return val
 end
 
-# Reduce a value across a block, using shared memory for communication
-@inline function reduce_block(op::F, val::T)::T where {F<:Function,T}
+"""Reduce a value across a block, using shared memory for communication"""
+@inline function reduce_block(op::F, val::T)::T where {F <: Function,T}
     # shared mem for 32 partial sums
     shared = @cuStaticSharedMem(T, 32)
 
@@ -54,15 +51,15 @@ end
     return val
 end
 
-# Reduce an array across a complete grid
+"""Reduce an array across a complete grid"""
 function reduce_grid(op::F, input::CuDeviceVector{T}, output::CuDeviceVector{T},
-                     len::Integer) where {F<:Function,T}
+                     len::Integer) where {F <: Function,T}
     # TODO: neutral element depends on the operator (see Base's 2 and 3 argument `reduce`)
     val = zero(T)
 
     # reduce multiple elements per thread (grid-stride loop)
     # TODO: step range (see JuliaGPU/CUDAnative.jl#12)
-    i = (blockIdx().x-1) * blockDim().x + threadIdx().x
+    i = (blockIdx().x - 1) * blockDim().x + threadIdx().x
     step = blockDim().x * gridDim().x
     while i <= len
         @inbounds val = op(val, input[i])
@@ -72,8 +69,8 @@ function reduce_grid(op::F, input::CuDeviceVector{T}, output::CuDeviceVector{T},
     val = reduce_block(op, val)
 
     if threadIdx().x == 1
-        @inbounds output[blockIdx().x] = val
-    end
+@inbounds output[blockIdx().x] = val
+end
 
     return
 end
@@ -100,11 +97,11 @@ function gpu_reduce(op::Function, input::CuArray{T}, output::CuArray{T}) where {
             throw(ArgumentError("output array too small, should be at least $blocks elements"))
         end
 
-        return (threads=config.threads, blocks=blocks)
+        return (threads = config.threads, blocks = blocks)
     end
 
     # NOTE: manual expansion of @cuda because we need the result of the dynamic launch config
-    #@cuda config=get_config reduce_grid(op, input, output, len)
+    # @cuda config=get_config reduce_grid(op, input, output, len)
     args = (op, input, output, len)
     GC.@preserve args begin
         kernel_args = cudaconvert.(args)
@@ -114,7 +111,7 @@ function gpu_reduce(op::Function, input::CuArray{T}, output::CuArray{T}) where {
         kernel(kernel_args...; kernel_config...)
     end
 
-    @cuda threads=kernel_config.threads reduce_grid(op, output, output, kernel_config.blocks)
+    @cuda threads = kernel_config.threads reduce_grid(op, output, output, kernel_config.blocks)
 end
 
 

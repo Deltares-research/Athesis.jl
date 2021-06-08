@@ -1,8 +1,8 @@
-#copy_state.jl
+# copy_state.jl
 
 using CUDA
 
-function new2old!(state::State,bc::BoundaryConditions)
+function new2old!(state::State, bc::BoundaryConditions)
     h    = state.h
     u    = state.u
     v    = state.v
@@ -19,10 +19,10 @@ end
 
 function copy_new2old!(bcpres::Array, h, u, v, w, hⁿ⁺¹, uⁿ⁺¹, vⁿ⁺¹, wⁿ⁺¹)
 
-    #println("CPU copy")
-    for k = 0:size(h)[3]-1
-        for j = 0:size(h)[2]-1
-            for i = 0:size(h)[1]-1
+    # println("CPU copy")
+    for k = 0:size(h)[3] - 1
+        for j = 0:size(h)[2] - 1
+            for i = 0:size(h)[1] - 1
                 copy_kernel!(i, j, k,
                        h, u, v, w, hⁿ⁺¹, uⁿ⁺¹, vⁿ⁺¹, wⁿ⁺¹)
             end
@@ -32,18 +32,18 @@ end
 
 function copy_new2old!(bcpres::CuArray, h, u, v, w, hⁿ⁺¹, uⁿ⁺¹, vⁿ⁺¹, wⁿ⁺¹)
 
-    #println("GPU copy")
-    ix = (blockIdx().x-1)*blockDim().x  + threadIdx().x
-    iy = (blockIdx().y-1)*blockDim().y  + threadIdx().y
-    iz = (blockIdx().z-1)*blockDim().z  + threadIdx().z
+    # println("GPU copy")
+    ix = (blockIdx().x - 1) * blockDim().x  + threadIdx().x
+    iy = (blockIdx().y - 1) * blockDim().y  + threadIdx().y
+    iz = (blockIdx().z - 1) * blockDim().z  + threadIdx().z
 
-    ths = (8,8,4)
-    nbx = Int(ceil(size(h)[1]/ths[1]))
-    nby = Int(ceil(size(h)[2]/ths[2]))
-    nbz = Int(ceil(size(h)[3]/ths[3]))
-    bls = (nbx,nby,nbz)
+    ths = (8, 8, 4)
+    nbx = Int(ceil(size(h)[1] / ths[1]))
+    nby = Int(ceil(size(h)[2] / ths[2]))
+    nbz = Int(ceil(size(h)[3] / ths[3]))
+    bls = (nbx, nby, nbz)
 
-    @cuda threads=ths blocks=bls cuda_wrap_copy!(
+    @cuda threads = ths blocks = bls cuda_wrap_copy!(
                             h, u, v, w,
                             hⁿ⁺¹, uⁿ⁺¹, vⁿ⁺¹, wⁿ⁺¹)
 
@@ -52,10 +52,10 @@ end
 function cuda_wrap_copy!(h, u, v, w,
                          hⁿ⁺¹, uⁿ⁺¹, vⁿ⁺¹, wⁿ⁺¹)
 
-    ix = (blockIdx().x-1)*blockDim().x  + threadIdx().x
-    iy = (blockIdx().y-1)*blockDim().y  + threadIdx().y
-    iz = (blockIdx().z-1)*blockDim().z  + threadIdx().z
-    if (0 <= ix <= nx+1 && 0 <= iy <= ny+1 && 0 <= iz <= nz+1)
+    ix = (blockIdx().x - 1) * blockDim().x  + threadIdx().x
+    iy = (blockIdx().y - 1) * blockDim().y  + threadIdx().y
+    iz = (blockIdx().z - 1) * blockDim().z  + threadIdx().z
+    if (0 <= ix <= nx + 1 && 0 <= iy <= ny + 1 && 0 <= iz <= nz + 1)
         copy_kernel!(ix, iy, iz,
                h, u, v, w,
                hⁿ⁺¹, uⁿ⁺¹, vⁿ⁺¹, wⁿ⁺¹)
