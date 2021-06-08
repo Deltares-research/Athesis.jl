@@ -49,8 +49,8 @@ end
     @inbounds begin
         h[0,j,k] = bcWest
         hⁿ⁺¹[0,j,k] = bcWest
-        h[nx+1,j,k] = bcEast
-        hⁿ⁺¹[nx+1,j,k] = bcEast
+        h[nx + 1,j,k] = bcEast
+        hⁿ⁺¹[nx + 1,j,k] = bcEast
     end
 end
 
@@ -60,8 +60,8 @@ end
     @inbounds begin
         h[i,0,k] = h[i,1,k]
         hⁿ⁺¹[i,0,k] = h[i,1,k]
-        h[i,ny+1,k] = h[i,ny,k]
-        hⁿ⁺¹[i,ny+1,k] = h[i,ny,k]
+        h[i,ny + 1,k] = h[i,ny,k]
+        hⁿ⁺¹[i,ny + 1,k] = h[i,ny,k]
     end
 end
 
@@ -69,10 +69,10 @@ end
     i, j = @index(Global, NTuple)
 
     @inbounds begin
-        h[i,j,0] = h[i,j,1]
+    h[i,j,0] = h[i,j,1]
         hⁿ⁺¹[i,j,0] = h[i,j,1]
-        h[i,j,nz+1] = h[i,j,nz]
-        hⁿ⁺¹[i,j,nz+1] = h[i,j,nz]
+        h[i,j,nz + 1] = h[i,j,nz]
+        hⁿ⁺¹[i,j,nz + 1] = h[i,j,nz]
     end
 end
 

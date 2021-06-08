@@ -82,7 +82,7 @@ function initSimulation(modelInput, useCUDA, myFloat, to)
 
         # Sources/sinks
         AT = typeof(externals)
-        source     = Source{AT, myFloat}(i_src, j_src, k_src, duration, source, externals)
+        source     = Source{AT,myFloat}(i_src, j_src, k_src, duration, source, externals)
         setSources!(0.0, source)
 
         # Recharge
@@ -107,7 +107,7 @@ function initSimulation(modelInput, useCUDA, myFloat, to)
         modelInput = nothing
 
         # Time related data
-        maxsteps  = round(Int64, tend/Δt)
+        maxsteps  = round(Int64, tend / Δt)
         time      = myFloat(0.0)
         timeData  = TimeData(Δt, tend, time, maxsteps)
 

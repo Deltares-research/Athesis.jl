@@ -17,9 +17,7 @@ include("athesis/kernels.jl")
 include("athesis/operators.jl")
 include("athesis/fields.jl")
 
-export
-    # API
-    getDefaultInput,
+export getDefaultInput,
     initSimulation,
     runSimulation!,
     doTimestep!,

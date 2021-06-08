@@ -5,7 +5,7 @@ using TimerOutputs
 
 using Athesis
 
-function groundwater3d(useGPU = false, myFloat = Float64)
+function groundwater3d(useGPU=false, myFloat=Float64)
 
     to = TimerOutput()
 

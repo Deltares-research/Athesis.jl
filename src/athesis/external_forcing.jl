@@ -16,11 +16,11 @@ end
 
 
 function setRecharge!(time, recharge)
-    #duration = recharge.duration
-    #if time < duration
+    # duration = recharge.duration
+    # if time < duration
         # Set a single source of at the prescribed point
-        recharge.rechargeFlux = recharge.rechargeFactor*recharge.constRecharge
-    #else
+    recharge.rechargeFlux = recharge.rechargeFactor * recharge.constRecharge
+    # else
     #    recharge.recharge_flux = 0.0
-    #end
+    # end
 end
