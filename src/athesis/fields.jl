@@ -6,7 +6,7 @@ using Adapt
 
 Adapt.adapt_structure(to, x::OffsetArray) = OffsetArray(adapt(to, parent(x)), x.offsets)
 
-
+"""Initialize a 3D array with the correct dimensions, possible with boundary offset, possibly as CUDA array."""
 function initField(inival, nx, ny, nz, useCUDA, useOffset, myFloat)
     # Initialize a field/array
 
@@ -39,6 +39,7 @@ end
 using CUDA
 using OffsetArrays
 
+"""Initialize a 1D vector with the correct dimensions, possible with boundary offset, possibly as CUDA array."""
 function initField1D(inival, nx, useCUDA, useOffset, myFloat)
     # Initialize a field/array
 

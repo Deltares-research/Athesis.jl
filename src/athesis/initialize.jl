@@ -4,6 +4,7 @@ using CUDA
 using OffsetArrays
 using TimerOutputs
 
+""" Initialize the state vector of the model."""
 function initModelState(grid, h0, u0, v0, w0, useCUDA, myFloat)
     # Allocate model state
     # with 4 parameters
@@ -30,10 +31,12 @@ function initModelState(grid, h0, u0, v0, w0, useCUDA, myFloat)
     return state
 end
 
+""" Instantiate a simulation object (without timer output)."""
 function initSimulation(modelInput, useCUDA, myFloat)
     initSimulation(modelInput, useCUDA, myFloat, TimerOutput())
 end
 
+""" Instantiate a simulation object (with timer output)."""
 function initSimulation(modelInput, useCUDA, myFloat, to)
 
     @synctimeit to "initialization" begin
