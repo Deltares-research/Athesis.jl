@@ -16,6 +16,8 @@ include("athesis/kernels_darcy_equation.jl")
 include("athesis/kernels.jl")
 include("athesis/operators.jl")
 include("athesis/fields.jl")
+include("athesis/bmi.jl")
+
 
 export getDefaultInput,
     initSimulation,
@@ -23,7 +25,7 @@ export getDefaultInput,
     doTimestep!,
     plotSimulation,
 
-    # data structures
+    # Data structures
     Grid,
     Model,
     ModelInput,
@@ -32,7 +34,7 @@ export getDefaultInput,
     TimeData,
     SolverData,
 
-    # macros
+    # Macros
     @synctimeit,
     @withCUDA
 
