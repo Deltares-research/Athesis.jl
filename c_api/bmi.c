@@ -4,11 +4,13 @@
 #include <stdio.h>
 #include <math.h>
 
-JULIA_DEFINE_FAST_TLS() // only define this once, in an executable
 
-
-#ifdef _OS_WINDOWS_
-__declspec(dllexport) __cdecl
+#if defined(_WIN32)
+#if !defined(MKERNEL_API)
+#define ATHESIS_API __declspec(dllexport)
+#endif
+#else
+#define ATHESIS_API __attribute__((visibility("default")))
 #endif
 
 jl_value_t *checked_eval_string(const char* code)
@@ -27,23 +29,41 @@ jl_value_t *checked_eval_string(const char* code)
     return result;
 }
 
-int main()
+ATHESIS_API int athesis_bmi_initialize()
 {
     jl_init();
-
-    {
-        // Test Athesis
-        checked_eval_string("import Pkg");
-        checked_eval_string("Pkg.activate(\"..\")");
-        checked_eval_string("Pkg.instantiate()");
-        checked_eval_string("using Athesis");
-        checked_eval_string("using BasicModelInterface");
-        checked_eval_string("const BMI = BasicModelInterface");
-        checked_eval_string("simulation = BMI.initialize(Simulation, nothing)");
-        checked_eval_string("BMI.update(simulation)");
-    }
-
-    int ret = 0;
-    jl_atexit_hook(ret);
-    return ret;
+    checked_eval_string("import Pkg");
+    checked_eval_string("Pkg.activate(\"..\")");
+    checked_eval_string("Pkg.instantiate()");
+    checked_eval_string("using Athesis");
+    checked_eval_string("using BasicModelInterface");
+    checked_eval_string("const BMI = BasicModelInterface");
+    checked_eval_string("simulation = BMI.initialize(Simulation, nothing)");
+    
 }
+
+ATHESIS_API int athesis_bmi_update()
+{
+    checked_eval_string("BMI.update(simulation)");
+}
+
+// int main()
+// {
+//     jl_init();
+
+//     {
+//         // Test Athesis
+//         checked_eval_string("import Pkg");
+//         checked_eval_string("Pkg.activate(\"..\")");
+//         checked_eval_string("Pkg.instantiate()");
+//         checked_eval_string("using Athesis");
+//         checked_eval_string("using BasicModelInterface");
+//         checked_eval_string("const BMI = BasicModelInterface");
+//         checked_eval_string("simulation = BMI.initialize(Simulation, nothing)");
+//         checked_eval_string("BMI.update(simulation)");
+//     }
+
+//     int ret = 0;
+//     jl_atexit_hook(ret);
+//     return ret;
+// }
