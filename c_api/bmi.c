@@ -4,6 +4,9 @@
 #include <stdio.h>
 #include <math.h>
 
+JULIA_DEFINE_FAST_TLS() // only define this once, in an executable
+
+
 #ifdef _OS_WINDOWS_
 __declspec(dllexport) __cdecl
 #endif
@@ -28,36 +31,16 @@ int main()
 {
     jl_init();
 
-    // {
-    //     // Importing a Julia package
-
-    //     checked_eval_string(
-    //     "let dir = dirname(unsafe_string(Base.JLOptions().julia_bin))\n"
-    //     // disable the package manager
-    //     "    ENV[\"JULIA_PKGDIR\"] = joinpath(dir, \"disabled\")\n"
-    //     // locate files relative to the "embedding" executable
-    //     "    stdlib = filter(env -> startswith(Base.find_package(\"Distributed\"), env), Base.load_path())[end]\n"
-    //     "    push!(empty!(LOAD_PATH), dir, stdlib)\n"
-    //     "end"
-    //     );
-    //     checked_eval_string("import LocalModule");
-    //     checked_eval_string("LocalModule.myapp()");
-    // }
-
-    // {
-    //     // Main.include and Main.eval exist (#28825)
-    //     checked_eval_string("include(\"include_and_eval.jl\")");
-    //     checked_eval_string("f28825()");
-    // }
-
     {
         // Test Athesis
         checked_eval_string("import Pkg");
         checked_eval_string("Pkg.activate(\"..\")");
         checked_eval_string("Pkg.instantiate()");
         checked_eval_string("using Athesis");
-        checked_eval_string("include(\"/mnt/c/checkouts/Athesis/Athesis.jl/test/runtests.jl\")");
-
+        checked_eval_string("using BasicModelInterface");
+        checked_eval_string("const BMI = BasicModelInterface");
+        checked_eval_string("simulation = BMI.initialize(Simulation, nothing)");
+        checked_eval_string("BMI.update(simulation)");
     }
 
     int ret = 0;

@@ -33,6 +33,7 @@ export getDefaultInput,
     State,
     TimeData,
     SolverData,
+    Simulation,
 
     # Macros
     @synctimeit,
