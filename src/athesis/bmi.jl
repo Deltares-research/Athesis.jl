@@ -29,8 +29,7 @@ time loop.
 """
 function BMI.update(simulation::Simulation)
     # We do not know the number of timesteps so set it to 1
-    n = 1
-    doTimestep!(n, simulation)
+    doTimestep!(simulation)
 end
 
 """
@@ -42,11 +41,12 @@ The given `time` must be a model time later than the current model time.
 """
 function BMI.update_until(simulation::Simulation, time)
     # We do not know the number of timesteps so set it to 1
-    n = 1
     while simulation.timeData.time < time
-        doTimestep!(n, simulation)
+        doTimestep!(simulation)
     end
 end
+
+
 
 """
     BMI.get_start_time(simulation::Simulation)

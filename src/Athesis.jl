@@ -22,7 +22,7 @@ include("athesis/bmi.jl")
 export getDefaultInput,
     initSimulation,
     runSimulation!,
-    doTimestep!,
+    doExplicitIter!,
     plotSimulation,
 
     # Data structures

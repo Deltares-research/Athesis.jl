@@ -27,7 +27,7 @@ for arch in archs
             # enforce precompilation
             @info "starting precompilation..."
             preSim = initSimulation(input, arch=="GPU", myFloat, disabledTimer)
-            doTimestep!(1, preSim)
+            doExplicitIter!(1, preSim)
 
             # run timing
             label = string(dim)
@@ -37,7 +37,7 @@ for arch in archs
 
                 nmax = 200
                 for i in 1:nmax
-                    hasCvg, = doTimestep!(i, sim, disabledTimer)
+                    hasCvg, = doExplicitIter!(i, sim, disabledTimer)
                     if hasCvg
                         break
                     end
