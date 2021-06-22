@@ -42,10 +42,14 @@ ATHESIS_API int initialize(char* config_file)
     return 0;
 }
 
-ATHESIS_API int update(dt)
+ATHESIS_API int update(double dt)
 {
     // not conforming to BMI, because dflowfm
-    checked_eval_string("BMI.update_until(simulation)");
+    checked_eval_string("update_until = BMI.update_until");
+    jl_function_t *func = jl_get_function(jl_main_module, "update_until");
+    jl_value_t* arg1 = (jl_value_t*)jl_get_global(jl_main_module, jl_symbol("simulation"));
+    jl_value_t* arg2 = jl_box_float64(dt);
+    jl_call2(func, arg1, arg2);
     return 0;
 }
 
