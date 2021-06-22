@@ -1,5 +1,7 @@
 module Athesis
 
+using TOML
+
 include("athesis/utils.jl")
 include("athesis/initialize.jl")
 include("athesis/run.jl")

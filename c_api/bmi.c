@@ -38,7 +38,7 @@ ATHESIS_API int initialize(char* config_file)
     checked_eval_string("using Athesis");
     checked_eval_string("using BasicModelInterface");
     checked_eval_string("const BMI = BasicModelInterface");
-    checked_eval_string("simulation = BMI.initialize(Simulation, nothing)");
+    checked_eval_string("simulation = BMI.initialize(Simulation, \"C:/checkouts/Athesis/Athesis.jl/Athesis.toml\")");
     return 0;
 }
 

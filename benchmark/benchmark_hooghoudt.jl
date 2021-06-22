@@ -19,7 +19,7 @@ dims = [(16, 16, 16), (32, 32, 16), (64, 64, 16), (128, 128, 16), (256, 256, 16)
 for arch in archs
     @synctimeit to arch begin
         for dim in dims
-            input = getDefaultInput(myFloat)
+            input = getDefaultInput(myFloat, "../Athesis.toml")
             input.nx = dim[1]
             input.ny = dim[2]
             input.nz = dim[3]

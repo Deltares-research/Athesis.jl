@@ -13,7 +13,7 @@ Will return a Simulation that is ready to run.
 """
 function BMI.initialize(::Type{<:Simulation}, config_file)
     myFloat = Float64
-    input = getDefaultInput(myFloat)
+    input = getDefaultInput(myFloat, config_file)
     useGPU = false
     simulation = initSimulation(input, useGPU, myFloat)
     return simulation
