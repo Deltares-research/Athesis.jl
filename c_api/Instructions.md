@@ -8,4 +8,4 @@
 1. Download and install Julia
 2. Open "MSYS2 MinGW 64-bit"
 3. Go to "c_api"
-4. `"$LOCALAPPDATA/Programs/Julia-1.6.1/bin/julia" "$LOCALAPPDATA/Programs/Julia-1.6.1/share/julia/julia-config.jl" --cflags --ldflags --ldlibs | xargs gcc -shared -o libathesis.dll bmi.c`
+4. `"$LOCALAPPDATA/Programs/Julia-1.6.1/bin/julia" "$LOCALAPPDATA/Programs/Julia-1.6.1/share/julia/julia-config.jl" --cflags --ldflags --ldlibs | xargs gcc -shared -o athesis.dll bmi.c`

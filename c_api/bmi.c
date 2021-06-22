@@ -29,23 +29,75 @@ jl_value_t *checked_eval_string(const char* code)
     return result;
 }
 
-ATHESIS_API int athesis_bmi_initialize()
+ATHESIS_API int initialize(char* config_file)
 {
     jl_init();
     checked_eval_string("import Pkg");
-    checked_eval_string("Pkg.activate(\"..\")");
+    checked_eval_string("Pkg.activate(\"C:/checkouts/Athesis/Athesis.jl\")");
     checked_eval_string("Pkg.instantiate()");
     checked_eval_string("using Athesis");
     checked_eval_string("using BasicModelInterface");
     checked_eval_string("const BMI = BasicModelInterface");
     checked_eval_string("simulation = BMI.initialize(Simulation, nothing)");
-    
+    return 0;
 }
 
-ATHESIS_API int athesis_bmi_update()
+ATHESIS_API int update(dt)
 {
-    checked_eval_string("BMI.update(simulation)");
+    // not conforming to BMI, because dflowfm
+    checked_eval_string("BMI.update_until(simulation)");
+    return 0;
 }
+
+ATHESIS_API int finalize()
+{
+     int ret = 0;
+     jl_atexit_hook(ret);
+     return ret;
+}
+
+ATHESIS_API int get_start_time(double* start_time)
+{
+    jl_value_t *ret = checked_eval_string("BMI.get_start_time(simulation)");
+    *start_time = jl_unbox_float64(ret);
+    return 0;
+}
+
+ATHESIS_API int get_end_time(double* end_time)
+{
+    jl_value_t *ret = checked_eval_string("BMI.get_end_time(simulation)");
+    *end_time = jl_unbox_float64(ret);
+    return 0;
+}
+
+ATHESIS_API int get_current_time(double* current_time)
+{
+    jl_value_t *ret = checked_eval_string("BMI.get_current_time(simulation)");
+    *current_time = jl_unbox_float64(ret);
+    return 0;
+}
+
+ATHESIS_API int get_time_step(double* time_step)
+{
+    jl_value_t *ret = checked_eval_string("BMI.get_time_step(simulation)");
+    *time_step = jl_unbox_float64(ret);
+    return 0;
+}
+
+ATHESIS_API int set_var(char* var_name, void* var)
+{
+    //checked_eval_string("BMI.set_value(simulation, name, value)");
+    return 0;
+}
+
+ATHESIS_API int get_var(char* var_name, void* var)
+{
+    //checked_eval_string("BMI.get_value(simulation, name, dest)");
+    return 0;
+}
+
+
+
 
 // int main()
 // {

@@ -62,11 +62,11 @@ function doTimestep!(n, simulation, to)
     end
 
     @synctimeit to "set_boundaries" begin
-        bc = model.boundaryConditions
+    bc = model.boundaryConditions
         setBoundaries!(grid, state, bc)
     end
 
-    @synctimeit to "solve pressure" begin
+        @synctimeit to "solve pressure" begin
         pressureEquation!(grid, model, state, parameters, timeData)
     end
 
@@ -80,7 +80,7 @@ function doTimestep!(n, simulation, to)
     end
 
     @synctimeit to "print iterations" begin
-        if mod(n,100) == 0
+        if mod(n, 100) == 0
             println("iter = ", n, ", Δh_max = ", Δh_max, " at ", max_index)
         end
     end
@@ -117,6 +117,6 @@ function findMaximum(h)
 end
 
 function findMaximum(h::CuArray)
-    m = reduce(max,h)
-    return m,-1
+    m = reduce(max, h)
+    return m, -1
 end
