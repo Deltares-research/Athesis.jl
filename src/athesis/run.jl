@@ -53,10 +53,10 @@ function doTimeStep!(simulation, to)
     # Update the old to the new solution
     @synctimeit to "update state" begin
         updateState!(state)
-        time += Δt
+        simulation.timeData.time += Δt
     end
 
-    return simulationConverged, Δh_max, max_index
+    nothing
 end
 
 function doExplicitIter!(n, simulation)

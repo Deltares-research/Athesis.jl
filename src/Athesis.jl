@@ -1,6 +1,10 @@
 module Athesis
 
 using TOML
+using Logging
+using BasicModelInterface
+
+const BMI = BasicModelInterface
 
 include("athesis/utils.jl")
 include("athesis/initialize.jl")
