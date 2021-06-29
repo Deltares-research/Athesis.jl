@@ -2,7 +2,6 @@
 
 #include <julia.h>
 #include <stdio.h>
-#include <math.h>
 
 
 #if defined(_WIN32)
@@ -43,26 +42,41 @@ void check_exception()
 }
 
 ATHESIS_API int initialize(char* config_file)
-{
+{   
+    // Initialize Julia
     jl_init();
+
+    // Activate Athesis
     checked_eval_string("import Pkg");
+    // The path to Athesis is hardcoded here
+    // If the C API becomes more than a proof of concept at some point that should be changed
     checked_eval_string("Pkg.activate(\"C:/checkouts/Athesis/Athesis.jl\")");
     checked_eval_string("Pkg.instantiate()");
     checked_eval_string("using Athesis");
     checked_eval_string("using BasicModelInterface");
     checked_eval_string("const BMI = BasicModelInterface");
-    checked_eval_string("simulation = BMI.initialize(Simulation, \"C:/checkouts/Athesis/dimr/exe/dimr/scripts/Athesis.toml\")");
+
+    // Initialize via the BMI
+    char* command = (char*)malloc(256 * sizeof(char));
+    sprintf(command, "simulation = BMI.initialize(Simulation, \"%s\")", config_file);
+    checked_eval_string(command);
+    free(command);
     return 0;
 }
 
+// Note that `update`should not contain any parameters according to BMI
+// Since the goal is to couple to dimr, we follow this standard though
 ATHESIS_API int update(double dt)
 {
-    // not conforming to BMI, because dflowfm
+    // Rebinding method to global namespace, until I found out how to do it properly
     checked_eval_string("update = BMI.update");
+    // Get function `update` and prepare arguments
     jl_function_t *func = jl_get_function(jl_main_module, "update");
     jl_value_t* arg1 = (jl_value_t*)jl_get_global(jl_main_module, jl_symbol("simulation"));
     jl_value_t* arg2 = jl_box_float64(dt);
+    // Call function
     jl_call2(func, arg1, arg2);
+    // Manual check if exception has been thrown
     check_exception();
     return 0;
 }
@@ -103,15 +117,12 @@ ATHESIS_API int get_time_step(double* time_step)
 
 ATHESIS_API int set_var(char* var_name, void* var)
 {    
-    //checked_eval_string("BMI.set_value(simulation, name, value)");
+    // TODO
     return 0;
 }
 
 ATHESIS_API int get_var(char* var_name, void* var)
 {
-    jl_value_t* simulation = jl_get_global(jl_main_module, jl_symbol("simulation"));
-    jl_value_t* field = jl_get_field(simulation, var_name);
-    var = jl_array_data(field);
-    //checked_eval_string("BMI.get_value(simulation, name, dest)");
+    // TODO
     return 0;
 }
