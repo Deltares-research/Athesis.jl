@@ -1,6 +1,10 @@
 # Basic Model Interface (BMI) implementation based on
 # https://github.com/Deltares/BasicModelInterface.jl
 
+# At the current state this should be considered as proof of concept.
+# To actually use it, it should not only be cleaned up, 
+# but also made general enough to support different scenarios.
+
 """
     BMI.initialize(::Type{<:Athesis.Simulation}, config_file)
 
@@ -8,10 +12,6 @@ Initialize the simulation.
 Will return a Simulation that is ready to run.
 """
 function BMI.initialize(::Type{<:Simulation}, config_file)
-    global f = open("log.txt","w")
-    logger = ConsoleLogger(f)
-    global_logger(logger)
-
     myFloat = Float64
     input = getDefaultInput(myFloat, config_file)
     useGPU = false
@@ -28,7 +28,6 @@ Perform all tasks that take place within one pass through the model's
 time loop.
 """
 function BMI.update(simulation::Simulation, dt)
-    global f
     time = simulation.timeData.time + dt
     @info("Δt is $dt")
     @info("Updating until $time")
@@ -88,6 +87,4 @@ function BMI.get_time_step(simulation::Simulation)
 end
 
 function BMI.finalize(simulation::Simulation)
-    global f
-    close(f)
 end
