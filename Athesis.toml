@@ -1,0 +1,52 @@
+# Model size per dimension (-)
+nx   = 11
+ny   = 11
+nz   = 1
+
+# Grid extent
+Lx = 80.0
+Ly = 80.0
+Lz = 10.0
+
+# hydraulic_conductivity (m/s, ~sand)
+K0   = 115.74e-6
+
+# specific storage (1/m)
+S0 = 100e-6
+
+# Time step (s)
+delta_t = 5.4
+
+# Initial condition
+h0   = 0.0     # (m)
+u0   = 0.0     # (m/s)
+v0   = 0.0     # (m/s)
+w0   = 0.0     # (m/s)
+
+# Boundary conditions
+h_bc_west = 1.0
+h_bc_east = 1.0
+
+# Source (well) data
+i_src  = 1
+j_src  = 1
+k_src  = 1
+duration = 0.0  # (s)
+source = 0.0    # (m3/s)
+# Recharge data
+# QR_nb = I_nb * M_nb * A_n
+# with QR_nb in (L^3/T, or m3/s)
+# I is the unit rescharge flux (m/s)
+# A is the cell area for cell n
+# M is a multiplier/factor
+unit_recharge_flux = 5.0e-4
+recharge_factor = 1.0      # (-)
+
+# Simulation end time (s)
+tend = 100000.0
+
+# Convergence criterion for steady state
+delta_h_conv = 1e-8
+
+
+

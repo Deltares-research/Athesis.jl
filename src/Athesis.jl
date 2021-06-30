@@ -1,5 +1,11 @@
 module Athesis
 
+using TOML
+using Logging
+using BasicModelInterface
+
+const BMI = BasicModelInterface
+
 include("athesis/utils.jl")
 include("athesis/initialize.jl")
 include("athesis/run.jl")
@@ -16,14 +22,16 @@ include("athesis/kernels_darcy_equation.jl")
 include("athesis/kernels.jl")
 include("athesis/operators.jl")
 include("athesis/fields.jl")
+include("athesis/bmi.jl")
+
 
 export getDefaultInput,
     initSimulation,
     runSimulation!,
-    doTimestep!,
+    doExplicitIter!,
     plotSimulation,
 
-    # data structures
+    # Data structures
     Grid,
     Model,
     ModelInput,
@@ -31,8 +39,9 @@ export getDefaultInput,
     State,
     TimeData,
     SolverData,
+    Simulation,
 
-    # macros
+    # Macros
     @synctimeit,
     @withCUDA
 
