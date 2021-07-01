@@ -30,76 +30,28 @@ mutable struct ModelInput{AT,FT}
 end
 
 """Returns default model input"""
-function getDefaultInput(myFloat)
+function getDefaultInput(myFloat, config_file)
+    config = TOML.parsefile(config_file)
 
-    # Model size per dimension (-)
-    nx   = 11
-    ny   = 11
-    nz   = 1
+    Δx   = config["Lx"] / (config["nx"] + 1)
+    Δy   = config["Ly"] / (config["ny"] + 1)
+    Δz   = config["Lz"] / (config["nz"] + 1)
 
-    # Grid extent
-    Lx = 80.0
-    Ly = 80.0
-    Lz = 10.0
+    constRecharge = config["unit_recharge_flux"] * Δx * Δy / (24 * 3600) # (m3/s)
 
-    # Grid sizes (m)
-    Δx   = Lx / (nx + 1)
-    Δy   = Ly / (ny + 1)
-    Δz   = Lz / (nz + 1)
-
-    # hydraulic_conductivity (m/s, ~sand)
-    K0   = 10.0 / (24 * 3600)
-
-    # specific storage (1/m)
-    S0 = 0.0001
-
-    # Time step (s)
-    Δt = S0 * (min(Δx, Δy, Δz))^2 / (4.0 * K0)
-
-    # Initial condition
-    h0   = 0.0     # (m)
-    u0   = 0.0     # (m/s)
-    v0   = 0.0     # (m/s)
-    w0   = 0.0     # (m/s)
-
-    # Boundary conditions
-    hBCWest = myFloat(1.0)
-    hBCEast = myFloat(1.0)
-    boundaryPressure = [hBCWest, hBCEast]
-
-    # Source (well) data
-    i_src  = 1
-    j_src  = 1
-    k_src  = 1
-    duration = 0.0  # (s)
-    source = 0.0    # (m3/s)
-
-    # Recharge data
-    # QR_nb = I_nb * M_nb * A_n
-    # with QR_nb in (L^3/T, or m3/s)
-    # I is the unit rescharge flux (m/s)
-    # A is the cell area for cell n
-    # M is a multiplier/factor
-    constRecharge = 5.0e-4 * Δx * Δy / (24 * 3600) # (m3/s)
-    rechargeFactor = 1.0      # (-)
-
-    # Simulation end time (s)
-    tend = 100000.0
-
-    # Convergence criterion for steady state
-    ΔhConv = 1e-8
+    boundaryPressure = [myFloat(config["h_bc_west"]), myFloat(config["h_bc_east"])]
 
     # Store the input in tuple "input"
     AT = typeof(boundaryPressure)
-    input = ModelInput{AT,myFloat}(nx, ny, nz,
-                                   Lx, Ly, Lz,
+    input = ModelInput{AT,myFloat}(config["nx"], config["nz"], config["nz"],
+                                   config["Lx"], config["Ly"], config["Ly"],
                                    Δx, Δy, Δz,
-                                   Δt, tend,
-                                   K0, S0,
-                                   h0, u0, v0, w0,
-                                   source, i_src, j_src, k_src, duration,
-                                   ΔhConv,
-                                   constRecharge, rechargeFactor,
+                                   config["delta_t"], config["tend"],
+                                   config["K0"], config["S0"],
+                                   config["h0"], config["u0"], config["v0"], config["w0"],
+                                   config["source"], config["i_src"], config["j_src"], config["k_src"], config["duration"],
+                                   config["delta_h_conv"],
+                                   constRecharge, config["recharge_factor"],
                                    boundaryPressure)
 
 end

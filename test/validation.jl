@@ -10,7 +10,7 @@ function testBulge(useGPU)
     to = TimerOutput()
 
     myFloat = Float64
-    input = getDefaultInput(myFloat)
+    input = getDefaultInput(myFloat, "../Athesis.toml")
 
     # calculate bulging level from input parameters
     bulge = input.Lx * input.Lx * input.constRecharge /
@@ -34,7 +34,7 @@ function testBulgeGPUvsCPU()
 
     to = TimerOutput()
     myFloat = Float64
-    input = getDefaultInput(myFloat)
+    input = getDefaultInput(myFloat, "../Athesis.toml")
 
     # CPU
     simulationCPU = initSimulation(input, false, myFloat, to)

@@ -19,7 +19,7 @@ dims = [(16, 16, 16), (32, 32, 16), (64, 64, 16), (128, 128, 16), (256, 256, 16)
 for arch in archs
     @synctimeit to arch begin
         for dim in dims
-            input = getDefaultInput(myFloat)
+            input = getDefaultInput(myFloat, "../Athesis.toml")
             input.nx = dim[1]
             input.ny = dim[2]
             input.nz = dim[3]
@@ -27,7 +27,7 @@ for arch in archs
             # enforce precompilation
             @info "starting precompilation..."
             preSim = initSimulation(input, arch=="GPU", myFloat, disabledTimer)
-            doTimestep!(1, preSim)
+            doExplicitIter!(1, preSim)
 
             # run timing
             label = string(dim)
@@ -37,7 +37,7 @@ for arch in archs
 
                 nmax = 200
                 for i in 1:nmax
-                    hasCvg, = doTimestep!(i, sim, disabledTimer)
+                    hasCvg, = doExplicitIter!(i, sim, disabledTimer)
                     if hasCvg
                         break
                     end
