@@ -1,5 +1,7 @@
 using KernelAbstractions
 
+@inline mat2vec(i, j, k, nx, ny) = i + (j - 1) * nx + (k - 1) * nx*ny
+
 function averageK(K, i, j, k)
     Kw = harmonicMean(K[i - 1, j,     k    ],     K[i,     j,     k    ])
     Ke = harmonicMean(K[i,     j,     k    ],     K[i + 1, j,     k    ])
@@ -14,7 +16,7 @@ function harmonicMean(v1, v2)
     return 2.0 * v1 * v2 / (v1 + v2)
 end
 
-@kernel function pressureKernel!(source, h, hⁿ⁺¹, Δx, Δy, Δz, Δt, K, SS)
+@kernel function explicitPressureKernel!(source, h, hⁿ⁺¹, Δx, Δy, Δz, Δt, K, SS)
     i, j, k = @index(Global, NTuple)
     
     @inbounds begin
@@ -25,6 +27,74 @@ end
             ) + source[i,j,k] / (Δx * Δy)
 
         hⁿ⁺¹[i,j,k] = h[i,j,k] + Δt * F * (1.0 / SS)
+    end
+
+end
+
+@kernel function implicitPressureKernel!(myA::MySparseMatrix, rhs, source, h, hⁿ⁺¹, nx, ny, nz, Δx, Δy, Δz, Δt, K, SS)
+    i, j, k = @index(Global, NTuple)
+
+    Δx² = Δx * Δx
+    Δy² = Δy * Δy
+    Δz² = Δz * Δz
+
+    @inbounds begin
+
+        # Present cell/equation index
+        ijk = mat2vec(i, j, k, nx, ny)
+
+        # Lower diagonal from negative z-dir
+        if k > 1
+            ijk1 = mat2vec(i, j , k - 1, nx, ny)
+            myA.rowptr[ijk] = ijk
+            myA.colptr[ijk] = ijk1
+            myA.vals[ijk]   = -K[i,j,k] / Δz²
+        end
+
+        # Lower diagonal from negative y-dir
+        if j > 1
+            ijk1 = mat2vec(i, j - 1, k, nx, ny)
+            myA.rowptr[ijk] = ijk
+            myA.colptr[ijk] = ijk1
+            myA.vals[ijk]   = -K[i,j,k] / Δy²
+        end
+
+        # Lower diagonal from negative x-dir
+        if i > 1
+            ijk1 = mat2vec(i - 1, j, k, nx, ny)
+            myA.rowptr[ijk] = ijk
+            myA.colptr[ijk] = ijk1
+            myA.vals[ijk]   = -K[i,j,k] / Δx²
+        end
+
+        # The main diagonal
+        myA.rowptr[ijk] = ijk
+        myA.colptr[ijk] = ijk
+        myA.vals[ijk]   = 2.0 * K[i,j,k] * (1.0 / Δx² + 1.0 / Δy² + 1.0 / Δz²)
+
+        # Upper diagonal from positive x-dir
+        if i < nx
+            ijk1 = mat2vec(i + 1, j, k, nx, ny)
+            myA.rowptr[ijk] = ijk
+            myA.colptr[ijk] = ijk1
+            myA.vals[ijk]    = -K[i,j,k] / Δx²
+        end
+
+        # Upper diagonal from positive y-dir
+        if j < ny
+            ijk1 = mat2vec(i, j + 1, k, nx, ny)
+            myA.rowptr[ijk] = ijk
+            myA.colptr[ijk] = ijk1
+            myA.vals[ijk]   = -K[i,j,k] / Δy²
+        end
+
+        # Upper diagonal from positive z-dir
+        if j < nz
+            ijk1 = mat2vec(i, j, k + 1, nx, ny)
+            myA.rowptr[ijk] = ijk
+            myA.colptr[ijk] = ijk1
+            myA.vals[ijk]   = -K[i,j,k] / Δz²
+        end
     end
 
 end

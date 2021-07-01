@@ -100,10 +100,11 @@ function prepareAndSolve!(simulation, to)
         grid        = simulation.grid
         model       = simulation.model
         state       = simulation.state
+        solverData  = simulation.solverData
         parameters  = simulation.parameters
         timeData    = simulation.timeData
         time        = timeData.time
-    
+         
         # Add the sources
         @synctimeit to "set rhs" begin
             setSources!(time, model.source)
@@ -115,8 +116,8 @@ function prepareAndSolve!(simulation, to)
             setBoundaries!(grid, state, bc)
         end
     
-            @synctimeit to "solve pressure" begin
-            pressureEquation!(grid, model, state, parameters, timeData)
+        @synctimeit to "solve pressure" begin
+            pressureEquation!(grid, model, state, parameters, solverData, timeData)
         end
     
         @synctimeit to "solve darcy" begin

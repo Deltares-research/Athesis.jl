@@ -70,9 +70,18 @@ mutable struct TimeData{FT}
     tend::FT
     time::FT
     maxsteps::Int64
+    timeIntegrationMethod::String
+end
+
+mutable struct LinearSystem{M,V,P}
+    A::M        # the coefficient matrix
+    rhs::V      # the right-hand-side vector
+    p::P        # the preconditioner
 end
 
 mutable struct SolverData{AT,FT}
+    linearSystem::LinearSystem
+    preconditioner::String
     ΔhConv::FT
     Δh::AT
 end

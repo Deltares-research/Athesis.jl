@@ -1,3 +1,5 @@
+using Test
+
 function testBulgeCPU()
     testBulge(false)
 end

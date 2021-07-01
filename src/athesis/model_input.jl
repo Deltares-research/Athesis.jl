@@ -27,6 +27,9 @@ mutable struct ModelInput{AT,FT}
     constRecharge::FT
     rechargeFactor::FT
     boundaryPressure::AT
+    timeIntegrationMethod::String
+    linearSolver::String
+    preconditioner::String
 end
 
 """Returns default model input"""
@@ -52,6 +55,9 @@ function getDefaultInput(myFloat, config_file)
                                    config["source"], config["i_src"], config["j_src"], config["k_src"], config["duration"],
                                    config["delta_h_conv"],
                                    constRecharge, config["recharge_factor"],
-                                   boundaryPressure)
+                                   boundaryPressure,
+                                   config["time_integration_method"],
+                                   config["linear_solver"],
+                                   config["preconditioner"])
 
 end

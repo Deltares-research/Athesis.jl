@@ -14,7 +14,7 @@ function groundwater3d(useGPU=false, myFloat=Float64)
         # Initialize the model
         println("Running 3D groundwater model:")
 
-        defaultInput = getDefaultInput(myFloat)
+        defaultInput = getDefaultInput(myFloat, "../Athesis.toml")
         simulation = initSimulation(defaultInput, useGPU, myFloat, to)
 
         runSimulation!(simulation, to)

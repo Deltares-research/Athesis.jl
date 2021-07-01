@@ -64,6 +64,9 @@ function initSimulation(modelInput, useCUDA, myFloat, to)
         constRecharge = modelInput.constRecharge
         rechargeFactor = modelInput.rechargeFactor
         boundaryPressure = modelInput.boundaryPressure
+        timeIntegrationMethod = modelInput.timeIntegrationMethod
+        linearSolver          = modelInput.linearSolver
+        preconditioner        = modelInput.preconditioner
 
         useOffset = true
         noOffset  = false
@@ -112,12 +115,23 @@ function initSimulation(modelInput, useCUDA, myFloat, to)
         # Time related data
         maxsteps  = round(Int64, tend / Δt)
         time      = myFloat(0.0)
-        timeData  = TimeData(Δt, tend, time, maxsteps)
+        timeData  = TimeData(Δt, tend, time, maxsteps, timeIntegrationMethod)
+
+        #if timeIntegrationMethod == "implicit_euler"
+            # For implicit time integration method: initialize the linear system
+            A, rhs = initLinearSystem(nx, ny, nz, myFloat, useCUDA)
+            
+            # Inistialize the preconditioner
+            p = setPreconditioner(preconditioner, A.A)
+
+            # Create the linear system
+            linearSystem = LinearSystem(A, rhs, p)
+        #end
 
         # Solver data
         Δh = initField(0.0, nx, ny, nz, useCUDA, useOffset, myFloat)
         AT = typeof(Δh)
-        solverData = SolverData{AT,myFloat}(ΔhConv, Δh)
+        solverData = SolverData{AT,myFloat}(linearSystem, preconditioner, ΔhConv, Δh)
 
         return Simulation(grid, model, state, parameters, timeData, solverData)
     end # end timer

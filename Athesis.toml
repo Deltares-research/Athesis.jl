@@ -48,5 +48,10 @@ tend = 100000.0
 # Convergence criterion for steady state
 delta_h_conv = 1e-8
 
+# Time integration method
+#time_integration_method = "explicit_euler"
+time_integration_method = "implicit_euler"
 
-
+# Linear solver and preconditioner
+linear_solver = "cg"
+preconditioner = "AMG_SmoothedAggregationPreconditioner"

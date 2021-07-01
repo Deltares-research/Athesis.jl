@@ -8,6 +8,7 @@ const BMI = BasicModelInterface
 
 include("athesis/utils.jl")
 include("athesis/initialize.jl")
+include("athesis/linear_solve.jl")
 include("athesis/run.jl")
 include("athesis/equations.jl")
 include("athesis/external_forcing.jl")
