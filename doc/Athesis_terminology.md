@@ -1,0 +1,30 @@
+Terminology:
+
+- Model
+- State (input/output)
+- Solution
+- Coupling
+- Coupler (object)
+- Implicit coupling
+- Explicit coupling
+- Equation
+- System of equations
+- Solution stage
+- Operator
+- Term?
+- Flux
+- Boundary condition
+- Grid
+- Spatial Discretization
+- Temporal Discretization
+- Nonlinear solve
+- Linear solve
+- Nonlinear solver (Newton)
+- Linear solver
+- Preconditioner
+- Architecture
+- Matrix
+- Vector
+- Right hand side
+- Update / timestep
+- Plot
